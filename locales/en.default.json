@@ -32,8 +32,19 @@
     "description": "Description",
     "materials": "Materials",
     "dimensions": "Dimensions",
+    "specifications": "Specifications",
     "care": "Care Instructions",
-    "sku": "SKU"
+    "sku": "SKU",
+    "buy_now": "Buy It Now",
+    "select_size": "Select Size",
+    "select_color": "Select Color"
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Add to Cart",
+      "sold_out": "Sold Out",
+      "unavailable": "Unavailable"
+    }
   },
   "collection": {
     "no_products": "No products found in this collection.",

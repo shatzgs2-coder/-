@@ -1,330 +1,816 @@
-<section class="product-page" data-section-id="{{ section.id }}" data-section-type="product">
-  {% assign current_variant = product.selected_or_first_available_variant %}
+<style>
+  /* === Aela Daily — Product Page (Atelier Wabi design system) === */
+  .ad-product {
+    background: #faf7f2;
+    padding: 0;
+  }
+  .ad-product__inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 80vh;
+  }
+  .ad-product__gallery {
+    background: #f0ebe1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 60px;
+    position: relative;
+    overflow: hidden;
+    min-height: 500px;
+  }
+  .ad-product__gallery img {
+    max-height: 600px;
+    width: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    transition: opacity 0.35s ease;
+  }
+  .ad-product__info {
+    padding: 80px 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 560px;
+  }
+  .ad-product__type {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #c17f59;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  .ad-product__title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    color: #2c2420;
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .ad-product__price {
+    font-size: 1.3rem;
+    color: #8b7355;
+    font-weight: 400;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .ad-product__price-compare {
+    font-size: 1rem;
+    color: #c4a882;
+    text-decoration: line-through;
+  }
+  .ad-product__divider {
+    height: 1px;
+    background: #e8e3d8;
+    margin: 28px 0;
+  }
 
-  <div class="product-page__grid">
-    <div class="product-page__gallery">
-      {% if product.featured_image %}
-        <img
-          src="{{ product.featured_image | img_url: '800x' }}"
-          alt="{{ product.featured_image.alt | escape }}"
-          id="product-main-image"
-          loading="eager"
-        >
-      {% else %}
-        <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&h=800&fit=crop" alt="No image" loading="eager">
-      {% endif %}
+  /* === Variant Selectors === */
+  .ad-variant-group {
+    margin-bottom: 24px;
+  }
+  .ad-variant-group__label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #2c2420;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ad-variant-group__label span {
+    font-weight: 400;
+    color: #8b7355;
+    font-size: 0.8rem;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  /* Size pills */
+  .ad-size-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .ad-size-btn {
+    min-width: 52px;
+    height: 42px;
+    padding: 0 20px;
+    border: 1.5px solid #d4cec4;
+    background: transparent;
+    border-radius: 6px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.88rem;
+    color: #2c2420;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ad-size-btn:hover:not(:disabled) {
+    border-color: #8b7355;
+    color: #8b7355;
+  }
+  .ad-size-btn--selected {
+    border-color: #8b7355;
+    background: #8b7355;
+    color: #fff;
+    font-weight: 500;
+  }
+  .ad-size-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
+  /* Color swatches */
+  .ad-color-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .ad-color-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    background: #e0dcd5;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.25s ease;
+    padding: 0;
+    outline: none;
+  }
+  .ad-color-btn:hover:not(:disabled) {
+    transform: scale(1.1);
+  }
+  .ad-color-btn--selected {
+    border-color: #2c2420;
+    box-shadow: 0 0 0 3px #faf7f2, 0 0 0 4.5px #8b7355;
+    transform: scale(1.08);
+  }
+  .ad-color-btn:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .ad-color-btn__swatch {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+  }
+  .ad-color-btn__tooltip {
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.65rem;
+    color: #6b5e53;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .ad-color-btn:hover .ad-color-btn__tooltip {
+    opacity: 1;
+  }
+
+  /* Quantity selector */
+  .ad-qty {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    border: 1.5px solid #d4cec4;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .ad-qty__btn {
+    width: 42px;
+    height: 44px;
+    border: none;
+    background: transparent;
+    font-size: 1.1rem;
+    color: #6b5e53;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .ad-qty__btn:hover { background: #f0ebe1; }
+  .ad-qty__input {
+    width: 54px;
+    height: 44px;
+    border: none;
+    border-left: 1.5px solid #d4cec4;
+    border-right: 1.5px solid #d4cec4;
+    text-align: center;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.95rem;
+    color: #2c2420;
+    background: transparent;
+    -moz-appearance: textfield;
+  }
+  .ad-qty__input::-webkit-outer-spin-button,
+  .ad-qty__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+  /* Action buttons */
+  .ad-product__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .ad-atc-btn {
+    width: 100%;
+    height: 52px;
+    border: none;
+    background: #8b7355;
+    color: #fff;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .ad-atc-btn:hover:not(:disabled) {
+    background: #2c2420;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(44,36,32,0.15);
+  }
+  .ad-atc-btn:disabled {
+    background: #d4cec4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .ad-atc-btn svg { width: 18px; height: 18px; }
+  .ad-buy-btn {
+    width: 100%;
+    height: 52px;
+    border: 1.5px solid #8b7355;
+    background: transparent;
+    color: #8b7355;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+  }
+  .ad-buy-btn:hover {
+    background: #8b7355;
+    color: #fff;
+  }
+
+  /* === Product Tabs === */
+  .ad-product-tabs {
+    margin-top: 44px;
+  }
+  .ad-product-tabs__nav {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #e8e3d8;
+    margin-bottom: 20px;
+  }
+  .ad-product-tabs__tab {
+    padding: 12px 28px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #6b5e53;
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 2px solid transparent;
+    transition: all 0.25s;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .ad-product-tabs__tab:hover { color: #c17f59; }
+  .ad-product-tabs__tab--active {
+    color: #c17f59;
+    border-bottom-color: #c17f59;
+  }
+  .ad-product-tabs__panel { display: none; }
+  .ad-product-tabs__panel--active { display: block; animation: adFadeIn 0.3s ease; }
+  @keyframes adFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .ad-product-tabs__panel p {
+    color: #6b5e53;
+    font-size: 0.9rem;
+    line-height: 1.85;
+    margin-bottom: 14px;
+  }
+  .ad-product-tabs__panel ul {
+    list-style: none;
+    padding: 0;
+    margin: 4px 0 16px;
+  }
+  .ad-product-tabs__panel ul li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #6b5e53;
+    padding: 5px 0;
+  }
+  .ad-product-tabs__panel ul li::before {
+    content: '✦';
+    color: #c17f59;
+    font-size: 0.5rem;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .ad-specs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  .ad-specs-table td {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0ebe1;
+    color: #3a3a3a;
+    vertical-align: top;
+  }
+  .ad-specs-table td:first-child {
+    color: #8b7355;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.7rem;
+    width: 110px;
+    padding-right: 20px;
+  }
+
+  /* === Responsive === */
+  @media (max-width: 968px) {
+    .ad-product__inner {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+    .ad-product__gallery {
+      padding: 48px 24px;
+      min-height: 360px;
+    }
+    .ad-product__gallery img {
+      max-height: 400px;
+    }
+    .ad-product__info {
+      padding: 40px 24px;
+      max-width: 100%;
+    }
+  }
+  @media (max-width: 480px) {
+    .ad-product__gallery { min-height: 300px; padding: 32px 16px; }
+    .ad-product__info { padding: 28px 16px; }
+    .ad-product-tabs__tab { padding: 10px 16px; font-size: 0.68rem; letter-spacing: 1px; }
+  }
+</style>
+
+<section
+  class="ad-product"
+  data-section-id="{{ section.id }}"
+  data-section-type="ad-product"
+>
+  {%- assign current_variant = product.selected_or_first_available_variant -%}
+
+  <div class="ad-product__inner">
+
+    {% comment %}=== GALLERY ==={% endcomment %}
+    <div class="ad-product__gallery">
+      {%- if product.featured_image -%}
+        {{ product.featured_image | image_url: width: 900 | image_tag:
+          id: 'ad-product-featured',
+          loading: 'eager',
+          alt: product.featured_image.alt | default: product.title,
+          class: 'ad-product__main-img'
+        }}
+      {%- else -%}
+        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#c4a882;font-family:'Cormorant Garamond',serif;font-size:2rem;letter-spacing:4px;text-align:center">
+          {{ shop.name }}
+        </div>
+      {%- endif -%}
     </div>
 
-    <div class="product-page__info">
-      {% if product.vendor != blank %}
-        <p class="product-page__vendor">{{ product.vendor }}</p>
-      {% endif %}
+    {% comment %}=== PRODUCT INFO ==={% endcomment %}
+    <div class="ad-product__info">
+      {%- if product.type != blank -%}
+        <p class="ad-product__type">{{ product.type }}</p>
+      {%- else -%}
+        <p class="ad-product__type">Home Decor</p>
+      {%- endif -%}
 
-      <h1 class="product-page__title">{{ product.title }}</h1>
+      <h1 class="ad-product__title">{{ product.title }}</h1>
 
-      <div class="product-page__price" data-price-wrapper>
-        <span data-product-price>
+      <div class="ad-product__price" data-price-wrapper>
+        <span class="ad-product__price-current" data-product-price>
           {{ current_variant.price | money }}
         </span>
-        {% if current_variant.compare_at_price > current_variant.price %}
-          <span class="compare-at" data-compare-price>
+        {%- if current_variant.compare_at_price > current_variant.price -%}
+          <span class="ad-product__price-compare" data-compare-price>
             {{ current_variant.compare_at_price | money }}
           </span>
-        {% endif %}
+        {%- endif -%}
       </div>
 
-      {% form 'product', product, id: 'product-form', class: 'product-form', data-product-form: '' %}
-        <input type="hidden" name="id" value="{{ current_variant.id }}" data-product-select>
+      <div class="ad-product__divider"></div>
 
-        {% unless product.has_only_default_variant %}
-          <div class="product-variants" data-variants>
-            {% for option in product.options_with_values %}
-              <div class="variant-selector">
-                <div class="variant-selector__label">{{ option.name }}</div>
-                <div class="variant-selector__options">
-                  {% for value in option.values %}
-                    {% assign is_available = false %}
-                    {% assign is_active = false %}
-                    {% for variant in product.variants %}
-                      {% if variant.option1 == value or variant.option2 == value or variant.option3 == value %}
-                        {% if variant.available %}
-                          {% assign is_available = true %}
-                        {% endif %}
-                      {% endif %}
-                    {% endfor %}
-                    {% if current_variant.option1 == value or current_variant.option2 == value or current_variant.option3 == value %}
-                      {% assign is_active = true %}
-                    {% endif %}
+      {% comment %}=== VARIANT SELECTORS ==={% endcomment %}
+      {%- form 'product', product, id: 'ad-product-form', class: 'ad-product__form' -%}
+        <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id>
+
+        {%- unless product.has_only_default_variant -%}
+          {%- for option in product.options_with_values -%}
+            {%- assign option_name_downcase = option.name | downcase -%}
+            {%- assign is_color = false -%}
+            {%- if option_name_downcase contains 'color' or option_name_downcase contains 'colour' or option_name_downcase contains 'farbe' or option_name_downcase contains '颜色' or option_name_downcase contains '香型' or option_name_downcase contains 'scent' -%}
+              {%- assign is_color = true -%}
+            {%- endif -%}
+
+            <div class="ad-variant-group" data-option-index="{{ forloop.index0 }}">
+              <div class="ad-variant-group__label">
+                {{ option.name }}
+                <span data-selected-option></span>
+              </div>
+
+              {%- if is_color -%}
+                <div class="ad-color-options">
+                  {%- for value in option.values -%}
+                    {%- assign color_hex = '#e0dcd5' -%}
+                    {%- assign value_downcase = value | downcase -%}
+                    {%- if value_downcase contains 'white' or value_downcase contains '白' or value_downcase contains 'cream' or value_downcase contains '米色' -%}
+                      {%- assign color_hex = '#f5f0e8' -%}
+                    {%- elsif value_downcase contains 'black' or value_downcase contains '黑' or value_downcase contains 'charcoal' -%}
+                      {%- assign color_hex = '#2c2420' -%}
+                    {%- elsif value_downcase contains 'grey' or value_downcase contains 'gray' or value_downcase contains '灰' or value_downcase contains 'stone' -%}
+                      {%- assign color_hex = '#9c958d' -%}
+                    {%- elsif value_downcase contains 'beige' or value_downcase contains 'wheat' or value_downcase contains '自然' or value_downcase contains '浅咖' or value_downcase contains 'natural' -%}
+                      {%- assign color_hex = '#d4c5b2' -%}
+                    {%- elsif value_downcase contains 'brown' or value_downcase contains '棕' or value_downcase contains '深咖' or value_downcase contains 'coffee' or value_downcase contains 'walnut' -%}
+                      {%- assign color_hex = '#8b7355' -%}
+                    {%- elsif value_downcase contains 'green' or value_downcase contains '绿' or value_downcase contains 'olive' or value_downcase contains 'sage' -%}
+                      {%- assign color_hex = '#7d8c6e' -%}
+                    {%- elsif value_downcase contains 'blue' or value_downcase contains '蓝' or value_downcase contains 'navy' -%}
+                      {%- assign color_hex = '#5b6e8a' -%}
+                    {%- elsif value_downcase contains 'terracotta' or value_downcase contains 'rust' or value_downcase contains '土' or value_downcase contains 'clay' -%}
+                      {%- assign color_hex = '#c17f59' -%}
+                    {%- elsif value_downcase contains 'red' or value_downcase contains '红' or value_downcase contains 'wine' -%}
+                      {%- assign color_hex = '#8b3a3a' -%}
+                    {%- elsif value_downcase contains 'pink' or value_downcase contains '粉' or value_downcase contains 'rose' -%}
+                      {%- assign color_hex = '#d4a0a0' -%}
+                    {%- elsif value_downcase contains '黄色' or value_downcase contains 'yellow' or value_downcase contains 'gold' -%}
+                      {%- assign color_hex = '#c4a35a' -%}
+                    {%- elsif value_downcase contains 'purple' or value_downcase contains '紫' or value_downcase contains 'lavender' -%}
+                      {%- assign color_hex = '#8b7daa' -%}
+                    {%- elsif value_downcase contains 'orange' or value_downcase contains '桔' or value_downcase contains 'amber' -%}
+                      {%- assign color_hex = '#c4946a' -%}
+                    {%- endif -%}
+
                     <button
                       type="button"
-                      class="variant-selector__btn{% if is_active %} variant-selector__btn--active{% endif %}{% unless is_available %} variant-selector__btn--unavailable{% endunless %}"
-                      data-option-name="{{ option.name | escape }}"
+                      class="ad-color-btn{% if option.selected_value == value %} ad-color-btn--selected{% endif %}"
+                      data-option-index="{{ forloop.index0 }}"
                       data-option-value="{{ value | escape }}"
-                      {% unless is_available %}disabled{% endunless %}
+                      title="{{ value }}"
+                    >
+                      <span class="ad-color-btn__swatch" style="background: {{ color_hex }}; border: 1px solid rgba(0,0,0,0.08)"></span>
+                      <span class="ad-color-btn__tooltip">{{ value }}</span>
+                    </button>
+                  {%- endfor -%}
+                </div>
+              {%- else -%}
+                <div class="ad-size-options">
+                  {%- for value in option.values -%}
+                    <button
+                      type="button"
+                      class="ad-size-btn{% if option.selected_value == value %} ad-size-btn--selected{% endif %}"
+                      data-option-index="{{ forloop.index0 }}"
+                      data-option-value="{{ value | escape }}"
                     >
                       {{ value }}
                     </button>
-                  {% endfor %}
+                  {%- endfor -%}
                 </div>
-              </div>
-            {% endfor %}
-          </div>
-        {% endunless %}
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        {%- endunless -%}
 
-        <div class="product-page__actions">
-          <div class="quantity-selector">
-            <button type="button" class="quantity-selector__btn" data-quantity-minus>&minus;</button>
-            <input
-              type="number"
-              name="quantity"
-              value="1"
-              min="1"
-              class="quantity-selector__input"
-              data-quantity-input
-            >
-            <button type="button" class="quantity-selector__btn" data-quantity-plus>+</button>
-          </div>
+        {% comment %}=== QUANTITY + ATC ==={% endcomment %}
+        <div class="ad-qty">
+          <button type="button" class="ad-qty__btn" data-qty-minus aria-label="Decrease quantity">&minus;</button>
+          <input
+            type="number"
+            name="quantity"
+            value="1"
+            min="1"
+            class="ad-qty__input"
+            data-qty-input
+            aria-label="Quantity"
+          >
+          <button type="button" class="ad-qty__btn" data-qty-plus aria-label="Increase quantity">+</button>
+        </div>
 
+        <div class="ad-product__actions">
           <button
             type="submit"
             name="add"
-            class="atc-btn"
+            class="ad-atc-btn"
             data-add-to-cart
             {% unless current_variant.available %}disabled{% endunless %}
           >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg>
             <span data-add-to-cart-text>
-              {% if current_variant.available %}
+              {%- if current_variant.available -%}
                 {{ 'product.add_to_cart' | t }}
-              {% else %}
+              {%- else -%}
                 {{ 'product.sold_out' | t }}
-              {% endif %}
+              {%- endif -%}
             </span>
           </button>
+
+          {%- if section.settings.show_buy_now -%}
+            {{ form | payment_button }}
+          {%- endif -%}
+        </div>
+      {%- endform -%}
+
+      {% comment %}=== PRODUCT DETAIL TABS ==={% endcomment %}
+      <div class="ad-product-tabs" data-product-tabs>
+        <div class="ad-product-tabs__nav">
+          {%- if section.settings.show_description and product.description != blank -%}
+            <button class="ad-product-tabs__tab ad-product-tabs__tab--active" data-tab="description">Description</button>
+          {%- endif -%}
+          {%- if section.settings.show_materials -%}
+            <button class="ad-product-tabs__tab{% unless section.settings.show_description and product.description != blank %} ad-product-tabs__tab--active{% endunless %}" data-tab="materials">Materials</button>
+          {%- endif -%}
+          {%- if section.settings.show_specs -%}
+            <button class="ad-product-tabs__tab" data-tab="specs">Specifications</button>
+          {%- endif -%}
+          {%- if section.settings.show_care -%}
+            <button class="ad-product-tabs__tab" data-tab="care">Care</button>
+          {%- endif -%}
         </div>
 
-        {% if section.settings.show_dynamic_checkout %}
-          {{ form | payment_button }}
-        {% endif %}
-      {% endform %}
-
-      {% if section.settings.show_description or section.settings.show_dimensions or section.settings.show_materials or section.settings.show_care %}
-        <div class="product-tabs" data-product-tabs>
-          <div class="product-tabs__nav">
-            {% if section.settings.show_description and product.description != blank %}
-              <button class="product-tabs__tab product-tabs__tab--active" data-tab="description">{{ 'product.description' | t }}</button>
-            {% endif %}
-            {% if section.settings.show_materials %}
-              <button class="product-tabs__tab" data-tab="materials" {% unless product.description != blank %}style="border-bottom-color:#C17F59;color:#C17F59;"{% endunless %}>{{ 'product.materials' | t }}</button>
-            {% endif %}
-            {% if section.settings.show_dimensions %}
-              <button class="product-tabs__tab" data-tab="dimensions">{{ 'product.dimensions' | t }}</button>
-            {% endif %}
-            {% if section.settings.show_care %}
-              <button class="product-tabs__tab" data-tab="care">{{ 'product.care' | t }}</button>
-            {% endif %}
+        {%- if section.settings.show_description and product.description != blank -%}
+          <div class="ad-product-tabs__panel ad-product-tabs__panel--active" data-tab-panel="description">
+            {{ product.description }}
           </div>
+        {%- endif -%}
 
-          {% if section.settings.show_description and product.description != blank %}
-            <div class="product-tabs__content product-tabs__content--active" data-tab-content="description">
-              {{ product.description }}
-            </div>
-          {% endif %}
+        {%- if section.settings.show_materials -%}
+          <div class="ad-product-tabs__panel{% unless section.settings.show_description and product.description != blank %} ad-product-tabs__panel--active{% endunless %}" data-tab-panel="materials">
+            {{ section.settings.materials_text }}
+          </div>
+        {%- endif -%}
 
-          {% if section.settings.show_materials %}
-            <div class="product-tabs__content" data-tab-content="materials">
-              {{ section.settings.materials_text }}
-            </div>
-          {% endif %}
-
-          {% if section.settings.show_dimensions %}
-            <div class="product-tabs__content" data-tab-content="dimensions">
-              {% if section.settings.dimensions_text != blank %}
-                {{ section.settings.dimensions_text }}
-              {% endif %}
-              <table class="product-tabs__specs" style="margin-top:16px;">
+        {%- if section.settings.show_specs -%}
+          <div class="ad-product-tabs__panel" data-tab-panel="specs">
+            {%- if section.settings.specs_intro != blank -%}
+              <p>{{ section.settings.specs_intro }}</p>
+            {%- endif -%}
+            {%- if section.blocks.size > 0 -%}
+              <table class="ad-specs-table">
                 <tbody>
-                  {% for block in section.blocks %}
-                    <tr>
-                      <td class="product-tabs__spec-label">{{ block.settings.label }}</td>
-                      <td class="product-tabs__spec-value">{{ block.settings.value }}</td>
-                    </tr>
-                  {% endfor %}
+                  {%- for block in section.blocks -%}
+                    {%- if block.type == 'spec' -%}
+                      <tr>
+                        <td>{{ block.settings.label }}</td>
+                        <td>{{ block.settings.value }}</td>
+                      </tr>
+                    {%- endif -%}
+                  {%- endfor -%}
                 </tbody>
               </table>
-            </div>
-          {% endif %}
+            {%- endif -%}
+          </div>
+        {%- endif -%}
 
-          {% if section.settings.show_care %}
-            <div class="product-tabs__content" data-tab-content="care">
-              {{ section.settings.care_text }}
-            </div>
-          {% endif %}
-        </div>
-      {% endif %}
+        {%- if section.settings.show_care -%}
+          <div class="ad-product-tabs__panel" data-tab-panel="care">
+            {{ section.settings.care_text }}
+          </div>
+        {%- endif -%}
+      </div>
+
     </div>
   </div>
 </section>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var productSection = document.querySelector('[data-section-type="product"]');
-    if (!productSection) return;
+  (function() {
+    var section = document.querySelector('[data-section-type="ad-product"]');
+    if (!section) return;
 
     var productData = {{ product | json }};
-    var form = productSection.querySelector('[data-product-form]');
-    var selectInput = productSection.querySelector('[data-product-select]');
-    var priceDisplay = productSection.querySelector('[data-product-price]');
-    var comparePriceDisplay = productSection.querySelector('[data-compare-price]');
-    var addToCartText = productSection.querySelector('[data-add-to-cart-text]');
-    var addToCartBtn = productSection.querySelector('[data-add-to-cart]');
-    var quantityInput = productSection.querySelector('[data-quantity-input]');
-    var imageEl = document.getElementById('product-main-image');
+    var form = section.querySelector('[data-variant-id]').closest('form');
+    var variantInput = section.querySelector('[data-variant-id]');
+    var priceEl = section.querySelector('[data-product-price]');
+    var compareEl = section.querySelector('[data-compare-price]');
+    var atcBtn = section.querySelector('[data-add-to-cart]');
+    var atcText = section.querySelector('[data-add-to-cart-text]');
+    var qtyInput = section.querySelector('[data-qty-input]');
+    var featuredImg = document.getElementById('ad-product-featured');
+    var moneyFormat = '{{ shop.money_format | default: "€{{amount}}" | escape }}';
 
-    function findVariant(selectedOptions) {
-      return productData.variants.find(function(variant) {
-        var match = true;
-        for (var i = 0; i < selectedOptions.length; i++) {
-          if (variant['option' + (i + 1)] !== selectedOptions[i]) {
-            match = false;
-            break;
-          }
+    function formatMoney(cents, format) {
+      if (typeof Shopify !== 'undefined' && Shopify.formatMoney) {
+        return Shopify.formatMoney(cents, format);
+      }
+      var value = (cents / 100).toFixed(2);
+      return format.replace('{{amount}}', value);
+    }
+
+    function findVariant(options) {
+      return productData.variants.find(function(v) {
+        for (var i = 0; i < options.length; i++) {
+          if (options[i] && v['option' + (i + 1)] !== options[i]) return false;
         }
-        return match;
+        return true;
       });
     }
 
     function getSelectedOptions() {
-      var optionSelectors = productSection.querySelectorAll('[data-variants] .variant-selector');
+      var groups = section.querySelectorAll('[data-option-index]');
       var selected = [];
-      optionSelectors.forEach(function(selector, index) {
-        var activeBtn = selector.querySelector('.variant-selector__btn--active');
-        if (activeBtn) {
-          selected[index] = activeBtn.getAttribute('data-option-value');
-        } else {
-          var firstAvailable = selector.querySelector('.variant-selector__btn:not(.variant-selector__btn--unavailable)');
-          if (firstAvailable) {
-            selected[index] = firstAvailable.getAttribute('data-option-value');
-          }
+      groups.forEach(function(btn) {
+        var idx = parseInt(btn.getAttribute('data-option-index'));
+        if (btn.classList.contains('ad-size-btn--selected') || btn.classList.contains('ad-color-btn--selected')) {
+          selected[idx] = btn.getAttribute('data-option-value');
         }
       });
       return selected;
     }
 
-    function updateFromVariant(variant) {
+    function updatePriceAndATC(variant) {
       if (!variant) return;
-      selectInput.value = variant.id;
-      if (priceDisplay) {
-        priceDisplay.textContent = Shopify.formatMoney(variant.price, '{{ shop.money_format | escape }}');
+      variantInput.value = variant.id;
+      if (priceEl) {
+        priceEl.textContent = formatMoney(variant.price, moneyFormat);
       }
-      if (comparePriceDisplay && variant.compare_at_price > variant.price) {
-        comparePriceDisplay.textContent = Shopify.formatMoney(variant.compare_at_price, '{{ shop.money_format | escape }}');
-        comparePriceDisplay.style.display = 'inline';
-      } else if (comparePriceDisplay) {
-        comparePriceDisplay.style.display = 'none';
+      if (compareEl) {
+        if (variant.compare_at_price && variant.compare_at_price > variant.price) {
+          compareEl.textContent = formatMoney(variant.compare_at_price, moneyFormat);
+          compareEl.style.display = 'inline';
+        } else {
+          compareEl.style.display = 'none';
+        }
       }
       if (variant.available) {
-        addToCartBtn.disabled = false;
-        addToCartText.textContent = '{{ "product.add_to_cart" | t }}';
+        atcBtn.disabled = false;
+        atcText.textContent = '{{ "products.product.add_to_cart" | t }}';
       } else {
-        addToCartBtn.disabled = true;
-        addToCartText.textContent = '{{ "product.sold_out" | t }}';
+        atcBtn.disabled = true;
+        atcText.textContent = '{{ "products.product.sold_out" | t }}';
       }
-      if (variant.featured_image && imageEl) {
-        imageEl.src = variant.featured_image.src;
-        imageEl.alt = variant.featured_image.alt;
+      if (variant.featured_image && featuredImg) {
+        featuredImg.src = variant.featured_image.src;
+        featuredImg.alt = variant.featured_image.alt || '';
       }
     }
 
     function updateAvailability() {
-      var optionSelectors = productSection.querySelectorAll('[data-variants] .variant-selector');
-      var selectedOptions = getSelectedOptions();
+      var allGroups = section.querySelectorAll('.ad-variant-group');
+      var currentSelected = getSelectedOptions();
 
-      optionSelectors.forEach(function(selector, optionIndex) {
-        var buttons = selector.querySelectorAll('.variant-selector__btn');
-        buttons.forEach(function(button) {
-          var testOptions = selectedOptions.slice();
-          testOptions[optionIndex] = button.getAttribute('data-option-value');
+      allGroups.forEach(function(group) {
+        var optionIndex = parseInt(group.getAttribute('data-option-index'));
+        var buttons = group.querySelectorAll('[data-option-value]');
+
+        buttons.forEach(function(btn) {
+          var testOptions = currentSelected.slice();
+          testOptions[optionIndex] = btn.getAttribute('data-option-value');
           var variant = findVariant(testOptions);
+
           if (variant && variant.available) {
-            button.classList.remove('variant-selector__btn--unavailable');
-            button.disabled = false;
+            btn.disabled = false;
+            btn.classList.remove('ad-color-btn--disabled', 'ad-size-btn--disabled');
           } else {
-            button.classList.add('variant-selector__btn--unavailable');
-            button.disabled = true;
+            btn.disabled = true;
           }
         });
       });
     }
 
-    productSection.addEventListener('click', function(e) {
-      var button = e.target.closest('.variant-selector__btn');
-      if (!button || button.disabled || button.classList.contains('variant-selector__btn--unavailable')) return;
-
-      var optionName = button.getAttribute('data-option-name');
-      var optionValue = button.getAttribute('data-option-value');
-      var selector = button.closest('.variant-selector');
-
-      selector.querySelectorAll('.variant-selector__btn').forEach(function(b) {
-        b.classList.remove('variant-selector__btn--active');
+    function updateSelectedLabels() {
+      var groups = section.querySelectorAll('.ad-variant-group');
+      groups.forEach(function(group) {
+        var label = group.querySelector('[data-selected-option]');
+        if (!label) return;
+        var selectedBtn = group.querySelector('.ad-color-btn--selected, .ad-size-btn--selected');
+        if (selectedBtn) {
+          label.textContent = ': ' + selectedBtn.getAttribute('data-option-value');
+        } else {
+          label.textContent = '';
+        }
       });
-      button.classList.add('variant-selector__btn--active');
+    }
+
+    // Click handler for all variant buttons
+    section.addEventListener('click', function(e) {
+      var btn = e.target.closest('.ad-size-btn, .ad-color-btn');
+      if (!btn || btn.disabled) return;
+
+      var optionIndex = parseInt(btn.getAttribute('data-option-index'));
+      var group = section.querySelector('.ad-variant-group[data-option-index="' + optionIndex + '"]');
+
+      // Deselect all in group
+      group.querySelectorAll('.ad-size-btn--selected, .ad-color-btn--selected').forEach(function(b) {
+        b.classList.remove('ad-size-btn--selected', 'ad-color-btn--selected');
+      });
+
+      // Select clicked
+      btn.classList.add(btn.classList.contains('ad-size-btn') ? 'ad-size-btn--selected' : 'ad-color-btn--selected');
 
       updateAvailability();
+      updateSelectedLabels();
+
+      // Try to find matching variant
       var selected = getSelectedOptions();
-      if (selected.filter(Boolean).length === selected.length) {
+      var allSelected = selected.every(function(s, i) {
+        return productData.options.length === i || s;
+      });
+
+      if (allSelected) {
         var variant = findVariant(selected);
-        if (variant) updateFromVariant(variant);
+        if (variant) updatePriceAndATC(variant);
       }
     });
 
-    var minusBtn = productSection.querySelector('[data-quantity-minus]');
-    var plusBtn = productSection.querySelector('[data-quantity-plus]');
-    if (minusBtn) {
-      minusBtn.addEventListener('click', function() {
-        var val = parseInt(quantityInput.value) || 1;
-        if (val > 1) quantityInput.value = val - 1;
-      });
-    }
-    if (plusBtn) {
-      plusBtn.addEventListener('click', function() {
-        var val = parseInt(quantityInput.value) || 0;
-        quantityInput.value = val + 1;
-      });
-    }
-
-    var tabButtons = productSection.querySelectorAll('[data-product-tabs] .product-tabs__tab');
-    tabButtons.forEach(function(tab) {
-      tab.addEventListener('click', function() {
-        var tabGroup = this.closest('[data-product-tabs]');
-        tabGroup.querySelectorAll('.product-tabs__tab--active').forEach(function(t) {
-          t.classList.remove('product-tabs__tab--active');
-        });
-        tabGroup.querySelectorAll('.product-tabs__content--active').forEach(function(c) {
-          c.classList.remove('product-tabs__content--active');
-        });
-        this.classList.add('product-tabs__tab--active');
-        var target = tabGroup.querySelector('[data-tab-content="' + this.getAttribute('data-tab') + '"]');
-        if (target) target.classList.add('product-tabs__content--active');
-      });
+    // Quantity buttons
+    section.addEventListener('click', function(e) {
+      var minusBtn = e.target.closest('[data-qty-minus]');
+      var plusBtn = e.target.closest('[data-qty-plus]');
+      if (minusBtn) {
+        var val = parseInt(qtyInput.value) || 1;
+        if (val > 1) qtyInput.value = val - 1;
+      }
+      if (plusBtn) {
+        var val = parseInt(qtyInput.value) || 0;
+        qtyInput.value = val + 1;
+      }
     });
 
+    // Tab switching
+    var tabContainer = section.querySelector('[data-product-tabs]');
+    if (tabContainer) {
+      tabContainer.addEventListener('click', function(e) {
+        var tab = e.target.closest('.ad-product-tabs__tab');
+        if (!tab) return;
+
+        var tabName = tab.getAttribute('data-tab');
+        tabContainer.querySelectorAll('.ad-product-tabs__tab--active').forEach(function(t) {
+          t.classList.remove('ad-product-tabs__tab--active');
+        });
+        tabContainer.querySelectorAll('.ad-product-tabs__panel--active').forEach(function(p) {
+          p.classList.remove('ad-product-tabs__panel--active');
+        });
+
+        tab.classList.add('ad-product-tabs__tab--active');
+        var panel = tabContainer.querySelector('[data-tab-panel="' + tabName + '"]');
+        if (panel) panel.classList.add('ad-product-tabs__panel--active');
+      });
+    }
+
+    // Initial state
     updateAvailability();
-  });
+    updateSelectedLabels();
+  })();
 </script>
 
 {% schema %}
 {
   "name": "Product Page",
+  "tag": "section",
   "settings": [
     {
       "type": "checkbox",
-      "id": "show_dynamic_checkout",
-      "label": "Show dynamic checkout button",
+      "id": "show_buy_now",
+      "label": "Show Buy It Now button",
       "default": true
     },
     {
       "type": "header",
-      "content": "Product Tabs"
+      "content": "Product Detail Tabs"
     },
     {
       "type": "checkbox",
@@ -342,18 +828,19 @@
       "type": "richtext",
       "id": "materials_text",
       "label": "Materials content",
-      "default": "<p>Crafted from natural, sustainably sourced materials. Each piece is unique with subtle variations in texture and tone that celebrate the art of handmade craftsmanship.</p><p><strong>Primary materials:</strong> Natural cotton rope, linen, solid beechwood, organic soy wax, unglazed ceramic.</p>"
+      "default": "<p>Each Aela Daily piece is crafted from carefully selected natural materials that honor the Japanese philosophy of <em>wabi-sabi</em> — finding beauty in imperfection and impermanence.</p><ul><li><strong>Natural cotton rope</strong> — hand-woven, unbleached, with subtle tonal variations</li><li><strong>Rattan &amp; wicker</strong> — sustainably harvested, hand-shaped by artisans</li><li><strong>Linen-cotton blend</strong> — pre-washed for softness, OEKO-TEX certified</li><li><strong>Natural soy wax</strong> — clean-burning, eco-friendly, vegan</li><li><strong>Unglazed ceramic</strong> — matte finish, hand-thrown, food-safe</li></ul>"
     },
     {
       "type": "checkbox",
-      "id": "show_dimensions",
-      "label": "Show Dimensions tab",
+      "id": "show_specs",
+      "label": "Show Specifications tab",
       "default": true
     },
     {
       "type": "text",
-      "id": "dimensions_text",
-      "label": "Dimensions intro text"
+      "id": "specs_intro",
+      "label": "Specifications intro text",
+      "default": "All measurements are approximate. Handmade items may vary slightly in size and finish."
     },
     {
       "type": "checkbox",
@@ -365,23 +852,25 @@
       "type": "richtext",
       "id": "care_text",
       "label": "Care instructions",
-      "default": "<p><strong>General care:</strong></p><ul><li>Spot clean with a damp cloth for most items.</li><li>Avoid prolonged direct sunlight to preserve natural colors.</li><li>Hand wash cotton rope items in cold water; reshape and air dry flat.</li><li>Ceramic pieces are dishwasher safe unless otherwise noted.</li><li>Wood items: wipe clean, occasional food-grade mineral oil treatment recommended.</li></ul>"
+      "default": "<p>To preserve the natural beauty of your Aela Daily pieces:</p><ul><li>Spot clean with a damp cloth for most items</li><li>Avoid prolonged direct sunlight to maintain natural tones</li><li>Cotton rope and linen items: hand wash in cold water, reshape and air dry flat</li><li>Rattan and wicker: dust regularly with a soft brush, occasional wipe with damp cloth</li><li>Soy wax candles: trim wick to 5mm before each use, never leave burning unattended</li><li>Ceramic pieces: dishwasher safe on gentle cycle, hand wash recommended for longevity</li></ul>"
     }
   ],
   "blocks": [
     {
       "type": "spec",
-      "name": "Product Spec",
+      "name": "Product Specification",
       "settings": [
         {
           "type": "text",
           "id": "label",
-          "label": "Label"
+          "label": "Label",
+          "default": "Material"
         },
         {
           "type": "text",
           "id": "value",
-          "label": "Value"
+          "label": "Value",
+          "default": "Natural cotton"
         }
       ]
     }
