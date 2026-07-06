@@ -1,35 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>{{ page_title }}{% if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif %}{% if current_page != 1 %} &ndash; Page {{ current_page }}{% endif %}{% unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless %}</title>
-
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>{{ page_title }}{% if page_title != shop.name %} — {{ shop.name }}{% endif %}</title>
   {% if page_description %}
-  <meta name="description" content="{{ page_description | escape }}">
+    <meta name="description" content="{{ page_description | escape }}">
   {% endif %}
-
+  <link rel="canonical" href="{{ canonical_url }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   {{ 'theme.css' | asset_url | stylesheet_tag }}
-
   {{ content_for_header }}
 </head>
-<body>
-
-  <a class="skip-to-content" href="#MainContent">{{ 'general.skip_to_content' | t }}</a>
-
+<body class="template-{{ template | replace: '.', '-' | handle }}">
   {% section 'header' %}
-
-  <main id="MainContent" role="main" tabindex="-1">
+  <main role="main">
     {{ content_for_layout }}
   </main>
-
   {% section 'footer' %}
-
   {{ 'theme.js' | asset_url | script_tag }}
 </body>
 </html>

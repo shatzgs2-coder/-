@@ -1,49 +1,42 @@
-<footer class="footer">
-  <div class="container">
-    <div class="footer__grid">
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__grid">
       <div>
-        <div class="footer__brand-name">{{ shop.name }}</div>
-        <div class="footer__brand">
-          <p>{{ 'footer.tagline' | t }}</p>
-          <p style="margin-top:12px">{{ 'footer.copyright' | t | replace: 'Aela Daily', shop.name | prepend: '&copy; ' | append: ' ' | append: 'now' | date: '%Y' }}</p>
-        </div>
+        <div class="site-footer__brand">{{ shop.name }}</div>
+        <p class="site-footer__tagline">{{ 'footer.tagline' | t }}</p>
+        <p class="site-footer__tagline" style="font-size:0.8rem;opacity:0.4;">{{ 'footer.description' | t }}</p>
       </div>
       <div>
-        <div class="footer__heading">{{ 'footer.quick_links' | t }}</div>
-        <ul class="footer__links">
-          <li><a href="/collections/all">{{ 'header.shop' | t }}</a></li>
-          <li><a href="/pages/about">{{ 'header.about' | t }}</a></li>
-          <li><a href="/pages/faq">{{ 'header.faq' | t }}</a></li>
+        <div class="site-footer__heading">{{ 'footer.shop' | t }}</div>
+        <ul class="site-footer__links">
+          <li><a href="/collections/all">{{ 'collections.all' | t }}</a></li>
+          <li><a href="/collections">{{ 'collections.title' | t }}</a></li>
         </ul>
       </div>
       <div>
-        <div class="footer__heading">{{ 'footer.customer_service' | t }}</div>
-        <ul class="footer__links">
+        <div class="site-footer__heading">{{ 'footer.company' | t }}</div>
+        <ul class="site-footer__links">
+          <li><a href="/pages/about">{{ 'header.about' | t }}</a></li>
+          <li><a href="/pages/philosophy">{{ 'header.philosophy' | t }}</a></li>
           <li><a href="/pages/contact">{{ 'header.contact' | t }}</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="site-footer__heading">{{ 'footer.customer_service' | t }}</div>
+        <ul class="site-footer__links">
           <li><a href="/pages/shipping">{{ 'header.shipping' | t }}</a></li>
+          <li><a href="/pages/faq">{{ 'header.faq' | t }}</a></li>
           <li><a href="/cart">{{ 'header.cart' | t }}</a></li>
         </ul>
       </div>
-      <div>
-        <div class="footer__heading">{{ 'footer.follow_us' | t }}</div>
-        <ul class="footer__links">
-          {% if settings.social_instagram != blank %}
-          <li><a href="{{ settings.social_instagram }}" target="_blank" rel="noopener">Instagram</a></li>
-          {% endif %}
-          {% if settings.social_pinterest != blank %}
-          <li><a href="{{ settings.social_pinterest }}" target="_blank" rel="noopener">Pinterest</a></li>
-          {% endif %}
-        </ul>
-      </div>
     </div>
-
-    <div class="footer__bottom">
+    <div class="site-footer__bottom">
       <span>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. {{ 'footer.copyright' | t }}</span>
-      <div class="footer__payment-icons">
-        <span title="Visa">Visa</span>
-        <span title="Mastercard">MC</span>
-        <span title="PayPal">PayPal</span>
-        <span title="Apple Pay">Apple Pay</span>
+      <div class="site-footer__payment-icons">
+        <span>Visa</span>
+        <span>MC</span>
+        <span>PayPal</span>
+        <span>Apple Pay</span>
       </div>
     </div>
   </div>

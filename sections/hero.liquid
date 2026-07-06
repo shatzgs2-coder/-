@@ -1,22 +1,13 @@
 <section class="hero">
-  {%- liquid
-    if section.settings.hero_image
-      assign bg_url = section.settings.hero_image | img_url: '1920x'
-    else
-      assign bg_url = 'hero-bg.jpg' | asset_url
-    endif
-  -%}
-  <div class="hero__bg" style="background-image: url('{{ bg_url }}');" role="img" aria-label="{{ section.settings.title }}">
-    <div class="hero__overlay"></div>
-  </div>
-  <div class="container">
-    <div class="hero__content">
-      <h1 class="hero__title">{{ section.settings.title | default: 'homepage.hero_title' | t }}</h1>
-      <p class="hero__subtitle">{{ section.settings.subtitle | default: 'homepage.hero_subtitle' | t }}</p>
-      <div class="hero__cta">
-        <a href="{{ section.settings.cta_link | default: '/collections/all' }}" class="btn btn-primary">{{ section.settings.cta_text | default: 'homepage.shop_now' | t }}</a>
-      </div>
-    </div>
+  <div class="hero__bg" style="background-image: url('{{ 'hero-bg.jpg' | asset_url }}');"></div>
+  <div class="hero__overlay"></div>
+  <div class="hero__content">
+    <p class="hero__label">{{ section.settings.label | default: "Slow Living, Curated" }}</p>
+    <h1 class="hero__title">{{ section.settings.heading | default: "The Beauty of Imperfection" }}</h1>
+    <p class="hero__subtitle">{{ section.settings.subtitle | default: "Thoughtfully sourced pieces that celebrate natural textures, muted tones, and the quiet elegance of wabi-sabi. For a home that breathes." }}</p>
+    {% if section.settings.cta_text != blank %}
+      <a href="{{ section.settings.cta_link | default: '/collections/all' }}" class="hero__cta">{{ section.settings.cta_text }}</a>
+    {% endif %}
   </div>
 </section>
 
@@ -26,33 +17,39 @@
   "settings": [
     {
       "type": "text",
-      "id": "title",
-      "label": "Heading",
-      "default": "Wabi-Sabi Living"
+      "id": "label",
+      "label": "Label",
+      "default": "Slow Living, Curated"
     },
     {
       "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The Beauty of Imperfection"
+    },
+    {
+      "type": "textarea",
       "id": "subtitle",
       "label": "Subtitle",
-      "default": "Handcrafted home goods for a mindful, serene space"
+      "default": "Thoughtfully sourced pieces that celebrate natural textures, muted tones, and the quiet elegance of wabi-sabi. For a home that breathes."
     },
     {
       "type": "text",
       "id": "cta_text",
-      "label": "Button text",
-      "default": "Shop Now"
+      "label": "CTA Text",
+      "default": "Explore Collection"
     },
     {
       "type": "url",
       "id": "cta_link",
-      "label": "Button link",
+      "label": "CTA Link",
       "default": "/collections/all"
-    },
+    }
+  ],
+  "presets": [
     {
-      "type": "image_picker",
-      "id": "hero_image",
-      "label": "Hero Background Image",
-      "info": "Upload a custom background image. Leave empty to use the default Japandi interior photo."
+      "name": "Hero",
+      "category": "Image"
     }
   ]
 }
