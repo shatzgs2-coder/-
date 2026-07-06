@@ -1,13 +1,20 @@
 <section class="hero">
-  <div class="hero__bg">
-    <div class="hero__bg-pattern"></div>
+  {%- liquid
+    if section.settings.hero_image
+      assign bg_url = section.settings.hero_image | img_url: '1920x'
+    else
+      assign bg_url = 'hero-bg.jpg' | asset_url
+    endif
+  -%}
+  <div class="hero__bg" style="background-image: url('{{ bg_url }}');" role="img" aria-label="{{ section.settings.title }}">
+    <div class="hero__overlay"></div>
   </div>
   <div class="container">
     <div class="hero__content">
-      <h1 class="hero__title">{{ 'homepage.hero_title' | t }}</h1>
-      <p class="hero__subtitle">{{ 'homepage.hero_subtitle' | t }}</p>
+      <h1 class="hero__title">{{ section.settings.title | default: 'homepage.hero_title' | t }}</h1>
+      <p class="hero__subtitle">{{ section.settings.subtitle | default: 'homepage.hero_subtitle' | t }}</p>
       <div class="hero__cta">
-        <a href="/collections/all" class="btn btn-primary">{{ 'homepage.shop_now' | t }}</a>
+        <a href="{{ section.settings.cta_link | default: '/collections/all' }}" class="btn btn-primary">{{ section.settings.cta_text | default: 'homepage.shop_now' | t }}</a>
       </div>
     </div>
   </div>
@@ -40,6 +47,12 @@
       "id": "cta_link",
       "label": "Button link",
       "default": "/collections/all"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero Background Image",
+      "info": "Upload a custom background image. Leave empty to use the default Japandi interior photo."
     }
   ]
 }
