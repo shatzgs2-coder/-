@@ -4,16 +4,18 @@
       "type": "hero",
       "settings": {}
     },
-    "featured-collection": {
-      "type": "featured-collection",
+    "brand-story": {
+      "type": "brand-story",
       "settings": {
-        "title": "Featured Products",
-        "subtitle": "Our best-selling wabi-sabi home essentials"
+        "label": "Our Story",
+        "title": "Where Japandi Meets Wabi-Sabi",
+        "button_text": "Discover More",
+        "button_link": "/pages/about"
       }
     }
   },
   "order": [
     "hero",
-    "featured-collection"
+    "brand-story"
   ]
 }
