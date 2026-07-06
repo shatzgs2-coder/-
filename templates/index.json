@@ -6,16 +6,20 @@
     },
     "brand-story": {
       "type": "brand-story",
+      "settings": {}
+    },
+    "featured-collection": {
+      "type": "featured-collection",
       "settings": {
-        "label": "Our Story",
-        "title": "Where Japandi Meets Wabi-Sabi",
-        "button_text": "Discover More",
-        "button_link": "/pages/about"
+        "title": "Our Collection",
+        "subtitle": "Pieces we love, selected for their quiet beauty and lasting quality.",
+        "products_to_show": 8
       }
+    },
+    "philosophy": {
+      "type": "philosophy",
+      "settings": {}
     }
   },
-  "order": [
-    "hero",
-    "brand-story"
-  ]
+  "order": ["hero", "brand-story", "featured-collection", "philosophy"]
 }

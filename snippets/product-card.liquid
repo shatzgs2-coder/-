@@ -1,28 +1,16 @@
-<div class="product-card">
-  <a href="{{ product.url }}" class="product-card__link">
-    <div class="product-card__image">
-      {% if product.featured_media %}
-        <img
-          src="{{ product.featured_media | img_url: '600x' }}"
-          alt="{{ product.featured_media.alt | escape }}"
-          loading="lazy"
-          width="600"
-          height="600"
-        >
-      {% else %}
-        {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
-      {% endif %}
-
-      {% if product.compare_at_price > product.price %}
-        <span class="product-card__badge">Sale</span>
-      {% endif %}
-    </div>
-    <div class="product-card__info">
-      <h3 class="product-card__title">{{ product.title }}</h3>
-      <span class="product-card__price">{{ product.price | money }}</span>
-      {% if product.compare_at_price > product.price %}
-        <span class="product-card__compare-price">{{ product.compare_at_price | money }}</span>
-      {% endif %}
-    </div>
-  </a>
-</div>
+<a href="{{ product.url }}" class="product-card">
+  <div class="product-card__image">
+    {% if product.featured_image %}
+      {{ product.featured_image | image_url: width: 400 | image_tag: loading: 'lazy', alt: product.featured_image.alt | escape }}
+    {% else %}
+      <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400&h=400&fit=crop" alt="No image" loading="lazy">
+    {% endif %}
+  </div>
+  <h3 class="product-card__title">{{ product.title }}</h3>
+  <p class="product-card__price">
+    {{ product.price | money }}
+    {% if product.compare_at_price > product.price %}
+      <span style="text-decoration:line-through;color:#C4A882;margin-left:8px;font-size:0.85rem;">{{ product.compare_at_price | money }}</span>
+    {% endif %}
+  </p>
+</a>

@@ -1,107 +1,77 @@
 {
   "general": {
-    "title": "Aela Daily",
-    "description": "Wabi-Sabi Home Goods | Handcrafted with care",
-    "newsletter_heading": "Subscribe to Our Newsletter",
-    "404": "Page Not Found"
+    "site_title": "Aela Daily",
+    "tagline": "The Beauty of Imperfection",
+    "search": "Search",
+    "menu": "Menu",
+    "404_title": "Page not found",
+    "404_text": "The page you're looking for doesn't exist."
   },
   "header": {
-    "home": "Home",
     "shop": "Shop",
     "about": "About",
-    "faq": "FAQ",
+    "philosophy": "Philosophy",
     "contact": "Contact",
     "shipping": "Shipping",
-    "search": "Search",
+    "faq": "FAQ",
     "cart": "Cart",
-    "account": "Account",
-    "menu": "Menu"
+    "account": "Account"
   },
-  "homepage": {
-    "hero_title": "Wabi-Sabi Living",
-    "hero_subtitle": "Handcrafted home goods for a mindful, serene space",
-    "shop_now": "Shop Now",
-    "featured_title": "Featured Products",
-    "featured_subtitle": "Our best-selling wabi-sabi home essentials"
-  },
-  "collection": {
-    "title": "All Products",
-    "sort_by": "Sort by",
-    "filter": "Filter",
-    "no_products": "No products found"
+  "home_page": {
+    "hero_cta": "Explore Collection",
+    "featured_title": "Curated for You",
+    "featured_subtitle": "Pieces we love, selected for their quiet beauty and lasting quality.",
+    "story_label": "Our Story",
+    "story_title": "Where Japandi Meets Wabi-Sabi"
   },
   "product": {
     "add_to_cart": "Add to Cart",
     "sold_out": "Sold Out",
+    "unavailable": "Unavailable",
     "quantity": "Quantity",
     "description": "Description",
-    "specifications": "Product Specifications",
-    "share": "Share",
-    "variant": "Variant"
+    "materials": "Materials",
+    "dimensions": "Dimensions",
+    "care": "Care Instructions",
+    "sku": "SKU"
+  },
+  "collection": {
+    "no_products": "No products found in this collection.",
+    "products": "Products",
+    "title": "All Products",
+    "all": "Shop All"
   },
   "cart": {
-    "title": "Shopping Cart",
+    "title": "Your Cart",
     "empty": "Your cart is empty",
-    "empty_subtitle": "Add some wabi-sabi items to get started",
-    "continue_shopping": "Continue Shopping",
-    "product": "Product",
-    "price": "Price",
-    "quantity": "Quantity",
-    "total": "Total",
-    "remove": "Remove",
+    "checkout": "Checkout",
     "subtotal": "Subtotal",
-    "shipping": "Shipping",
-    "shipping_calc": "Calculated at checkout",
-    "order_total": "Order Total",
-    "checkout": "Proceed to Checkout",
-    "secure": "Secure Checkout"
+    "price": "Price",
+    "continue_shopping": "Continue Shopping",
+    "remove": "Remove"
   },
   "footer": {
-    "copyright": "Aela Daily. All rights reserved.",
-    "tagline": "Wabi-Sabi Home Goods | Handcrafted with care",
-    "quick_links": "Quick Links",
+    "shop": "Shop",
+    "company": "Company",
     "customer_service": "Customer Service",
     "follow_us": "Follow Us",
-    "payment_methods": "Payment Methods"
-  },
-  "faq": {
-    "title": "Frequently Asked Questions",
-    "subtitle": "Find answers to common questions",
-    "shipping": "Shipping",
-    "products": "Products",
-    "orders": "Orders",
-    "payment": "Payment"
-  },
-  "contact": {
-    "title": "Contact Us",
-    "subtitle": "We'd love to hear from you",
-    "name": "Name",
-    "email": "Email",
-    "message": "Message",
-    "send": "Send Message",
-    "info": "Contact Information",
-    "email_label": "Email",
-    "phone": "Phone",
-    "address": "Address",
-    "hours": "Business Hours",
-    "hours_text": "Mon-Fri: 9:00 - 18:00 CET"
+    "tagline": "Wabi-Sabi Home Goods",
+    "description": "Handcrafted with care. Curated in Berlin.",
+    "copyright": "All rights reserved.",
+    "quick_links": "Quick Links"
   },
   "shipping": {
-    "title": "Shipping Information",
-    "subtitle": "Delivery options and rates",
+    "title": "Shipping & Returns",
+    "subtitle": "Everything you need to know about delivery and returns.",
     "rates": "Shipping Rates",
+    "destination": "Region",
+    "delivery_time": "Delivery Time",
     "germany": "Germany",
-    "eu": "European Union",
+    "eu": "EU",
     "free": "Free Shipping",
-    "free_condition": "On orders over €50",
-    "days": "days",
-    "returns_title": "Returns & Exchanges",
-    "returns_subtitle": "Easy 30-day return process"
-  },
-  "about": {
-    "title": "About Aela Daily",
-    "subtitle": "Bringing wabi-sabi aesthetics to everyday life",
-    "story": "Our Story",
-    "mission": "Our Mission"
+    "free_condition": "Orders over €79",
+    "days": "business days",
+    "returns_title": "Returns",
+    "returns_subtitle": "Not satisfied? We accept returns within 30 days of delivery."
   }
 }

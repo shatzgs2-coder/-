@@ -1,137 +1,16 @@
-<section class="brand-story" id="brand-story">
-  <div class="brand-story__bg"
-       style="background-image: url('{{ 'brand-story-bg.jpg' | asset_url }}');">
-    <div class="brand-story__overlay"></div>
-  </div>
-  <div class="brand-story__content container">
-    <span class="brand-story__label">{{ section.settings.label | default: "Our Story" }}</span>
+<section class="brand-story" id="story">
+  <div class="brand-story__image" style="background-image: url('{{ 'brand-story-bg.jpg' | asset_url }}');"></div>
+  <div class="brand-story__text">
+    <p class="brand-story__label">{{ section.settings.label | default: "Our Story" }}</p>
     <h2 class="brand-story__title">{{ section.settings.title | default: "Where Japandi Meets Wabi-Sabi" }}</h2>
-    <div class="brand-story__divider"></div>
-    <div class="brand-story__text">
-      {{ section.settings.story | default: "<p>Born from a love for quiet luxury and mindful living, Aela Daily curates pieces that bring harmony into everyday spaces. Each item in our collection is thoughtfully selected to honor the beauty of imperfection — the essence of <em>wabi-sabi</em>.</p><p>We believe your home should tell a story: of natural textures, muted tones, and the gentle rhythm of Scandinavian simplicity meeting Japanese warmth.</p>" }}
+    <div class="brand-story__desc">
+      {{ section.settings.story_text }}
     </div>
     {% if section.settings.button_text != blank %}
       <a href="{{ section.settings.button_link | default: '/pages/about' }}" class="brand-story__btn">{{ section.settings.button_text }}</a>
     {% endif %}
   </div>
 </section>
-
-<style>
-  .brand-story {
-    position: relative;
-    min-height: 600px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    margin: 0;
-    padding: 80px 24px;
-  }
-
-  .brand-story__bg {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    z-index: 0;
-  }
-
-  .brand-story__overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(31, 27, 22, 0.72);
-    z-index: 1;
-  }
-
-  .brand-story__content {
-    position: relative;
-    z-index: 2;
-    max-width: 640px;
-    text-align: center;
-    color: #FAFAF7;
-  }
-
-  .brand-story__label {
-    display: inline-block;
-    font-family: var(--font-heading, 'Inter', sans-serif);
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: #C4A77D;
-    margin-bottom: 20px;
-  }
-
-  .brand-story__title {
-    font-family: var(--font-heading, 'Inter', sans-serif);
-    font-size: clamp(28px, 5vw, 42px);
-    font-weight: 300;
-    line-height: 1.25;
-    color: #FFFFFF;
-    margin-bottom: 16px;
-    letter-spacing: -0.02em;
-  }
-
-  .brand-story__divider {
-    width: 48px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #C4A77D, transparent);
-    margin: 0 auto 32px;
-  }
-
-  .brand-story__text {
-    font-size: 16px;
-    line-height: 1.8;
-    color: rgba(250, 250, 247, 0.85);
-    margin-bottom: 36px;
-  }
-
-  .brand-story__text p {
-    margin: 0 0 16px;
-  }
-
-  .brand-story__text p:last-child {
-    margin-bottom: 0;
-  }
-
-  .brand-story__text em {
-    color: #C4A77D;
-    font-style: italic;
-  }
-
-  .brand-story__btn {
-    display: inline-block;
-    padding: 14px 36px;
-    border: 1px solid rgba(196, 167, 125, 0.6);
-    color: #C4A77D;
-    font-family: var(--font-body, 'Inter', sans-serif);
-    font-size: 13px;
-    font-weight: 400;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    text-decoration: none;
-    transition: all 0.35s ease;
-    cursor: pointer;
-    background: transparent;
-  }
-
-  .brand-story__btn:hover {
-    background: rgba(196, 167, 125, 0.15);
-    border-color: #C4A77D;
-    color: #FAFAF7;
-  }
-
-  @media (max-width: 768px) {
-    .brand-story {
-      min-height: 480px;
-      padding: 60px 20px;
-    }
-    .brand-story__text {
-      font-size: 15px;
-    }
-  }
-</style>
 
 {% schema %}
 {
@@ -140,20 +19,20 @@
     {
       "type": "text",
       "id": "label",
-      "label": "Small Label",
+      "label": "Label",
       "default": "Our Story"
     },
     {
-      "type": "textarea",
+      "type": "text",
       "id": "title",
-      "label": "Heading",
+      "label": "Title",
       "default": "Where Japandi Meets Wabi-Sabi"
     },
     {
       "type": "richtext",
-      "id": "story",
+      "id": "story_text",
       "label": "Story Text",
-      "default": "<p>Born from a love for quiet luxury and mindful living, Aela Daily curates pieces that bring harmony into everyday spaces. Each item in our collection is thoughtfully selected to honor the beauty of imperfection — the essence of wabi-sabi.</p><p>We believe your home should tell a story: of natural textures, muted tones, and the gentle rhythm of Scandinavian simplicity meeting Japanese warmth.</p>"
+      "default": "<p>Born from a love for quiet luxury and mindful living, Aela Daily curates pieces that bring harmony into everyday spaces. Each item in our collection is thoughtfully selected to honor the beauty of imperfection \u2014 the essence of <em>wabi-sabi</em>.</p><p>We work with artisans across Europe and Asia who craft with natural materials: linen, cotton rope, solid wood, and soy wax. No two pieces are exactly alike \u2014 and that's precisely the point.</p><p>We believe your home should tell a story: of natural textures, muted tones, and the gentle rhythm of Scandinavian simplicity meeting Japanese warmth.</p>"
     },
     {
       "type": "text",

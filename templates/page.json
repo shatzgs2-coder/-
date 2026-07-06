@@ -1,0 +1,15 @@
+<div class="section">
+  <div class="page-template">
+    <h1 class="page-template__title">{{ page.title }}</h1>
+    <div class="page-template__content">
+      {{ page.content }}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Default Page",
+  "settings": []
+}
+{% endschema %}

@@ -1,64 +1,52 @@
-<section class="contact-section">
-  <div class="container">
-    <div class="section-heading">
-      <h2 class="section-heading__title">{{ 'contact.title' | t }}</h2>
-      <p class="section-heading__subtitle">{{ 'contact.subtitle' | t }}</p>
-    </div>
-
+<section class="section">
+  <div class="section__inner" style="max-width:900px;">
+    <h1 class="section__heading">Contact Us</h1>
+    <p class="section__subtitle">We'd love to hear from you. Drop us a message and we'll get back within 24 hours.</p>
     <div class="contact-grid">
-      <div class="contact-form">
+      <div>
         {% form 'contact' %}
-          {% if form.posted_successfully? %}
-            <p style="color:var(--color-accent);margin-bottom:20px">Thank you! We'll get back to you within 24 hours.</p>
+          {% if form.posted_successfully %}
+            <p style="color:#8B7355;font-size:1rem;padding:20px;background:#F5F0E8;border-radius:8px;margin-bottom:24px;">Thank you for your message! We'll be in touch soon.</p>
           {% endif %}
-
-          <div class="contact-form__group">
-            <label for="ContactFormName">{{ 'contact.name' | t }}</label>
-            <input type="text" id="ContactFormName" name="contact[name]" placeholder="Your name" required>
+          {{ form.errors | default_errors }}
+          <div class="contact-form__field">
+            <label for="contact-name">Name</label>
+            <input type="text" id="contact-name" name="contact[name]" required>
           </div>
-
-          <div class="contact-form__group">
-            <label for="ContactFormEmail">{{ 'contact.email' | t }}</label>
-            <input type="email" id="ContactFormEmail" name="contact[email]" placeholder="your@email.com" required>
+          <div class="contact-form__field">
+            <label for="contact-email">Email</label>
+            <input type="email" id="contact-email" name="contact[email]" required>
           </div>
-
-          <div class="contact-form__group">
-            <label for="ContactFormMessage">{{ 'contact.message' | t }}</label>
-            <textarea id="ContactFormMessage" name="contact[body]" placeholder="How can we help you?" required></textarea>
+          <div class="contact-form__field">
+            <label for="contact-phone">Phone (optional)</label>
+            <input type="tel" id="contact-phone" name="contact[phone]">
           </div>
-
-          <button type="submit" class="btn btn-primary">{{ 'contact.send' | t }}</button>
+          <div class="contact-form__field">
+            <label for="contact-message">Message</label>
+            <textarea id="contact-message" name="contact[body]" required></textarea>
+          </div>
+          <button type="submit" class="contact-form__submit">Send Message</button>
         {% endform %}
       </div>
-
       <div class="contact-info">
         <div class="contact-info__item">
-          <div class="contact-info__icon">&#9993;</div>
-          <div>
-            <div class="contact-info__label">{{ 'contact.email_label' | t }}</div>
-            <div class="contact-info__value">hello@aeladaily.com</div>
-          </div>
+          <div class="contact-info__label">Email</div>
+          <div class="contact-info__value">hello@aeladaily.com</div>
         </div>
-
         <div class="contact-info__item">
-          <div class="contact-info__icon">&#9742;</div>
-          <div>
-            <div class="contact-info__label">{{ 'contact.phone' | t }}</div>
-            <div class="contact-info__value">+49 (0) 123 456789</div>
-          </div>
+          <div class="contact-info__label">Location</div>
+          <div class="contact-info__value">Berlin, Germany</div>
         </div>
-
         <div class="contact-info__item">
-          <div class="contact-info__icon">&#9906;</div>
-          <div>
-            <div class="contact-info__label">{{ 'contact.address' | t }}</div>
-            <div class="contact-info__value">Musterstrasse 123<br>10115 Berlin, Germany</div>
+          <div class="contact-info__label">Follow Us</div>
+          <div class="contact-info__value">
+            <a href="#" style="color:#6B5E53;text-decoration:underline;">Instagram</a> &middot;
+            <a href="#" style="color:#6B5E53;text-decoration:underline;">Pinterest</a>
           </div>
         </div>
-
-        <div class="contact-hours">
-          <div class="contact-hours__title">{{ 'contact.hours' | t }}</div>
-          <div class="contact-hours__text">{{ 'contact.hours_text' | t }}</div>
+        <div class="contact-info__item">
+          <div class="contact-info__label">Business Hours</div>
+          <div class="contact-info__value">Monday - Friday: 9:00 - 18:00 CET<br>Weekends: Closed</div>
         </div>
       </div>
     </div>
@@ -68,6 +56,12 @@
 {% schema %}
 {
   "name": "Contact Form",
-  "settings": []
+  "settings": [],
+  "presets": [
+    {
+      "name": "Contact Form",
+      "category": "Form"
+    }
+  ]
 }
 {% endschema %}

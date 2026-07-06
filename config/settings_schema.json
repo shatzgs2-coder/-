@@ -1,77 +1,50 @@
 [
   {
-    "name": "theme_info",
-    "theme_name": "Aela Daily",
-    "theme_version": "1.0.0",
-    "theme_author": "Aela Daily",
-    "theme_documentation_url": "https://aeladaily.com",
-    "theme_support_url": "https://aeladaily.com"
+    "type": "text",
+    "id": "social_instagram",
+    "label": "Instagram URL"
   },
   {
-    "name": "Colors",
-    "settings": [
-      {
-        "type": "color",
-        "id": "color_bg",
-        "label": "Background color",
-        "default": "#FAFAF7"
-      },
-      {
-        "type": "color",
-        "id": "color_text",
-        "label": "Text color",
-        "default": "#1F1B16"
-      },
-      {
-        "type": "color",
-        "id": "color_accent",
-        "label": "Accent color",
-        "default": "#8B6F47"
-      },
-      {
-        "type": "color",
-        "id": "color_muted",
-        "label": "Muted/Secondary color",
-        "default": "#E8E4DF"
-      },
-      {
-        "type": "color",
-        "id": "color_body",
-        "label": "Body text color",
-        "default": "#5A5048"
-      }
-    ]
+    "type": "text",
+    "id": "social_pinterest",
+    "label": "Pinterest URL"
   },
   {
-    "name": "Typography",
-    "settings": [
-      {
-        "type": "font_picker",
-        "id": "type_heading_font",
-        "label": "Heading font",
-        "default": "inter_n4"
-      },
-      {
-        "type": "font_picker",
-        "id": "type_body_font",
-        "label": "Body font",
-        "default": "inter_n4"
-      }
-    ]
+    "type": "header",
+    "content": "Colors"
   },
   {
-    "name": "Social media",
-    "settings": [
-      {
-        "type": "url",
-        "id": "social_instagram",
-        "label": "Instagram URL"
-      },
-      {
-        "type": "url",
-        "id": "social_pinterest",
-        "label": "Pinterest URL"
-      }
-    ]
+    "type": "color",
+    "id": "color_bg",
+    "label": "Background",
+    "default": "#FAFAF7"
+  },
+  {
+    "type": "color",
+    "id": "color_text",
+    "label": "Text",
+    "default": "#2C2420"
+  },
+  {
+    "type": "color",
+    "id": "color_accent",
+    "label": "Accent",
+    "default": "#C17F59"
+  },
+  {
+    "type": "header",
+    "content": "Typography"
+  },
+  {
+    "type": "font_picker",
+    "id": "type_header_font",
+    "label": "Heading font",
+    "default": "cormorant_garamond_n4"
+  },
+  {
+    "type": "font_picker",
+    "id": "type_body_font",
+    "label": "Body font",
+    "default": "inter_n4"
   }
 ]

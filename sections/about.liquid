@@ -1,0 +1,125 @@
+<section class="section about" id="about">
+  <div class="section__inner">
+    <div class="about-grid">
+      <div class="about-grid__image">
+        {% if section.settings.image %}
+          {{ section.settings.image | image_url: width: 600 | image_tag: loading: 'lazy', alt: 'About Aela Daily' }}
+        {% else %}
+          <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&h=800&fit=crop" alt="Wabi-sabi interior" loading="lazy">
+        {% endif %}
+      </div>
+      <div class="about-grid__text">
+        <p class="section__label" style="text-align:left;">{{ section.settings.label | default: "Our Story" }}</p>
+        <h2>{{ section.settings.heading | default: "Where Less Becomes More" }}</h2>
+        {{ section.settings.text }}
+        <div class="about-values">
+          <div class="about-values__item">
+            <h4>{{ section.settings.value1_title | default: "Handcrafted" }}</h4>
+            <p>{{ section.settings.value1_text | default: "Every piece is made by human hands, not machines. You'll feel the difference." }}</p>
+          </div>
+          <div class="about-values__item">
+            <h4>{{ section.settings.value2_title | default: "Natural Materials" }}</h4>
+            <p>{{ section.settings.value2_text | default: "Linen, cotton rope, soy wax, solid wood. Pure, biodegradable, timeless." }}</p>
+          </div>
+          <div class="about-values__item">
+            <h4>{{ section.settings.value3_title | default: "Slow Living" }}</h4>
+            <p>{{ section.settings.value3_text | default: "We believe in buying less, choosing well, and making it last." }}</p>
+          </div>
+          <div class="about-values__item">
+            <h4>{{ section.settings.value4_title | default: "Direct Artisan" }}</h4>
+            <p>{{ section.settings.value4_text | default: "No middlemen. We connect you directly with master craftspeople." }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About Content",
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "Our Story"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Where Less Becomes More"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Content",
+      "default": "<p>Aela Daily was born from a quiet afternoon in Berlin, inspired by the Japanese philosophy of <em>wabi-sabi</em> \u2014 finding beauty in imperfection, transience, and simplicity. Each piece in our collection tells a story of craftsmanship, natural materials, and mindful living.</p><p>We work directly with skilled artisans across Europe and Asia who weave cotton rope by hand, dye linen with natural pigments, and pour soy candles in small batches. No two pieces are exactly alike \u2014 and that's precisely the point.</p><p>Our mission is simple: bring objects into your home that age gracefully, feel good to touch, and spark a quiet sense of contentment every time you notice them.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Values"
+    },
+    {
+      "type": "text",
+      "id": "value1_title",
+      "label": "Value 1 Title",
+      "default": "Handcrafted"
+    },
+    {
+      "type": "text",
+      "id": "value1_text",
+      "label": "Value 1 Text",
+      "default": "Every piece is made by human hands, not machines. You'll feel the difference."
+    },
+    {
+      "type": "text",
+      "id": "value2_title",
+      "label": "Value 2 Title",
+      "default": "Natural Materials"
+    },
+    {
+      "type": "text",
+      "id": "value2_text",
+      "label": "Value 2 Text",
+      "default": "Linen, cotton rope, soy wax, solid wood. Pure, biodegradable, timeless."
+    },
+    {
+      "type": "text",
+      "id": "value3_title",
+      "label": "Value 3 Title",
+      "default": "Slow Living"
+    },
+    {
+      "type": "text",
+      "id": "value3_text",
+      "label": "Value 3 Text",
+      "default": "We believe in buying less, choosing well, and making it last."
+    },
+    {
+      "type": "text",
+      "id": "value4_title",
+      "label": "Value 4 Title",
+      "default": "Direct Artisan"
+    },
+    {
+      "type": "text",
+      "id": "value4_text",
+      "label": "Value 4 Text",
+      "default": "No middlemen. We connect you directly with master craftspeople."
+    }
+  ],
+  "presets": [
+    {
+      "name": "About Content",
+      "category": "Text"
+    }
+  ]
+}
+{% endschema %}

@@ -4,13 +4,12 @@
       "type": "collection-banner",
       "settings": {}
     },
-    "product-grid": {
-      "type": "product-grid",
-      "settings": {}
+    "main-collection": {
+      "type": "main-collection",
+      "settings": {
+        "products_per_page": 12
+      }
     }
   },
-  "order": [
-    "collection-banner",
-    "product-grid"
-  ]
+  "order": ["collection-banner", "main-collection"]
 }

@@ -1,64 +1,61 @@
-<section class="shipping-section">
-  <div class="container">
-    <div class="section-heading">
-      <h2 class="section-heading__title">{{ 'shipping.title' | t }}</h2>
-      <p class="section-heading__subtitle">{{ 'shipping.subtitle' | t }}</p>
-    </div>
+<section class="section">
+  <div class="section__inner" style="max-width:900px;">
+    <h1 class="section__heading">Shipping & Returns</h1>
+    <p class="section__subtitle">Everything you need to know about delivery and returns.</p>
 
-    <h3 style="font-size:20px;font-weight:700;margin-bottom:16px">{{ 'shipping.rates' | t }}</h3>
-
+    <h3 style="font-family:var(--font-heading);font-size:1.4rem;color:#2C2420;margin-bottom:16px;">Shipping Rates</h3>
     <table class="shipping-table">
       <thead>
         <tr>
-          <th>{{ 'shipping.destination' | t: 'Region' }}</th>
-          <th>{{ 'cart.price' | t }}</th>
-          <th>{{ 'shipping.delivery_time' | t: 'Delivery Time' }}</th>
+          <th>Region</th>
+          <th>Price</th>
+          <th>Delivery Time</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>{{ 'shipping.germany' | t }}</td>
-          <td class="highlight">€4.90</td>
-          <td>2-4 {{ 'shipping.days' | t }}</td>
+          <td>Germany</td>
+          <td style="color:#8B7355;font-weight:500;">€4.90</td>
+          <td>2 - 4 Business Days</td>
         </tr>
         <tr>
-          <td>{{ 'shipping.eu' | t }}</td>
-          <td class="highlight">€8.90</td>
-          <td>4-7 {{ 'shipping.days' | t }}</td>
+          <td>EU</td>
+          <td style="color:#8B7355;font-weight:500;">€8.90</td>
+          <td>4 - 7 Business Days</td>
         </tr>
         <tr>
-          <td>{{ 'shipping.free' | t }}</td>
-          <td class="highlight">Free</td>
-          <td>{{ 'shipping.free_condition' | t }}</td>
+          <td>Free Shipping</td>
+          <td style="color:#8B7355;font-weight:500;">Free</td>
+          <td>On orders over €79 within EU</td>
         </tr>
       </tbody>
     </table>
 
-    <div class="section-heading" style="margin-top:60px">
-      <h2 class="section-heading__title">{{ 'shipping.returns_title' | t }}</h2>
-      <p class="section-heading__subtitle">{{ 'shipping.returns_subtitle' | t }}</p>
-    </div>
+    <div style="margin-top:60px;">
+      <h2 class="section__heading" style="text-align:left;font-size:1.4rem;">Returns</h2>
+      <p class="section__subtitle" style="text-align:left;max-width:none;margin-bottom:36px;">Not satisfied? We accept returns within 30 days of delivery. Items must be unused and in original packaging.</p>
 
-    <div class="returns-steps">
-      <div class="returns-step">
-        <div class="returns-step__number">1</div>
-        <h4 class="returns-step__title">Contact Us</h4>
-        <p class="returns-step__desc">Email us at hello@aeladaily.com with your order number and reason for return.</p>
-      </div>
-      <div class="returns-step">
-        <div class="returns-step__number">2</div>
-        <h4 class="returns-step__title">Pack Item</h4>
-        <p class="returns-step__desc">Place unused items in original packaging. Include your order confirmation.</p>
-      </div>
-      <div class="returns-step">
-        <div class="returns-step__number">3</div>
-        <h4 class="returns-step__title">Ship Back</h4>
-        <p class="returns-step__desc">We'll provide a return label. Drop off at your nearest DHL/Deutsche Post location.</p>
-      </div>
-      <div class="returns-step">
-        <div class="returns-step__number">4</div>
-        <h4 class="returns-step__title">Get Refund</h4>
-        <p class="returns-step__desc">Refund processed within 5 business days after we receive and inspect the return.</p>
+      <div class="returns-steps">
+        <div class="returns-step">
+          <div class="returns-step__number">1</div>
+          <h4>Contact Us</h4>
+          <p>Email hello@aeladaily.com with your order number and reason for return.</p>
+        </div>
+        <div class="returns-step">
+          <div class="returns-step__number">2</div>
+          <h4>Pack Item</h4>
+          <p>Place unused items in original packaging. Include your order confirmation.</p>
+        </div>
+        <div class="returns-step">
+          <div class="returns-step__number">3</div>
+          <h4>Ship Back</h4>
+          <p>We'll provide a return label. Drop off at your nearest DHL location.</p>
+        </div>
+        <div class="returns-step">
+          <div class="returns-step__number">4</div>
+          <h4>Get Refund</h4>
+          <p>Refund processed within 5 business days after we receive and inspect the return.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -67,6 +64,12 @@
 {% schema %}
 {
   "name": "Shipping Info",
-  "settings": []
+  "settings": [],
+  "presets": [
+    {
+      "name": "Shipping Info",
+      "category": "Page"
+    }
+  ]
 }
 {% endschema %}

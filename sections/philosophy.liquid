@@ -1,0 +1,39 @@
+<section class="philosophy">
+  <div class="philosophy__inner">
+    <p class="philosophy__label">{{ section.settings.label | default: "Our Philosophy" }}</p>
+    <blockquote class="philosophy__quote">{{ section.settings.quote | default: "Wabi-sabi is not a style. It is a way of seeing — a quiet appreciation for the worn, the weathered, the simply beautiful." }}</blockquote>
+    <p class="philosophy__text">{{ section.settings.text | default: "From hand-knotted table runners to cotton rope laundry baskets, our collection is an invitation to slow down. To fill your home with textures that feel good. To celebrate the imperfect, the handmade, and the real." }}</p>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Philosophy Quote",
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Section Label",
+      "default": "Our Philosophy"
+    },
+    {
+      "type": "textarea",
+      "id": "quote",
+      "label": "Quote",
+      "default": "Wabi-sabi is not a style. It is a way of seeing — a quiet appreciation for the worn, the weathered, the simply beautiful."
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Text",
+      "default": "From hand-knotted table runners to cotton rope laundry baskets, our collection is an invitation to slow down. To fill your home with textures that feel good. To celebrate the imperfect, the handmade, and the real."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Philosophy Quote",
+      "category": "Text"
+    }
+  ]
+}
+{% endschema %}

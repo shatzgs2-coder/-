@@ -1,0 +1,35 @@
+<div class="section">
+  <div class="section__inner">
+    {% paginate collection.products by section.settings.products_per_page %}
+      <div class="product-grid">
+        {% for product in collection.products %}
+          {% render 'product-card', product: product %}
+        {% else %}
+          <p style="grid-column:1/-1;text-align:center;color:#6B5E53;padding:60px 0;">{{ 'collection.no_products' | t }}</p>
+        {% endfor %}
+      </div>
+      {% if paginate.pages > 1 %}
+        <div style="text-align:center;margin-top:48px;">
+          {{ paginate | default_pagination }}
+        </div>
+      {% endif %}
+    {% endpaginate %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Main Collection",
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products per page",
+      "min": 4,
+      "max": 24,
+      "step": 4,
+      "default": 12
+    }
+  ]
+}
+{% endschema %}

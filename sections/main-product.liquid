@@ -1,0 +1,390 @@
+<section class="product-page" data-section-id="{{ section.id }}" data-section-type="product">
+  {% assign current_variant = product.selected_or_first_available_variant %}
+
+  <div class="product-page__grid">
+    <div class="product-page__gallery">
+      {% if product.featured_image %}
+        <img
+          src="{{ product.featured_image | img_url: '800x' }}"
+          alt="{{ product.featured_image.alt | escape }}"
+          id="product-main-image"
+          loading="eager"
+        >
+      {% else %}
+        <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&h=800&fit=crop" alt="No image" loading="eager">
+      {% endif %}
+    </div>
+
+    <div class="product-page__info">
+      {% if product.vendor != blank %}
+        <p class="product-page__vendor">{{ product.vendor }}</p>
+      {% endif %}
+
+      <h1 class="product-page__title">{{ product.title }}</h1>
+
+      <div class="product-page__price" data-price-wrapper>
+        <span data-product-price>
+          {{ current_variant.price | money }}
+        </span>
+        {% if current_variant.compare_at_price > current_variant.price %}
+          <span class="compare-at" data-compare-price>
+            {{ current_variant.compare_at_price | money }}
+          </span>
+        {% endif %}
+      </div>
+
+      {% form 'product', product, id: 'product-form', class: 'product-form', data-product-form: '' %}
+        <input type="hidden" name="id" value="{{ current_variant.id }}" data-product-select>
+
+        {% unless product.has_only_default_variant %}
+          <div class="product-variants" data-variants>
+            {% for option in product.options_with_values %}
+              <div class="variant-selector">
+                <div class="variant-selector__label">{{ option.name }}</div>
+                <div class="variant-selector__options">
+                  {% for value in option.values %}
+                    {% assign is_available = false %}
+                    {% assign is_active = false %}
+                    {% for variant in product.variants %}
+                      {% if variant.option1 == value or variant.option2 == value or variant.option3 == value %}
+                        {% if variant.available %}
+                          {% assign is_available = true %}
+                        {% endif %}
+                      {% endif %}
+                    {% endfor %}
+                    {% if current_variant.option1 == value or current_variant.option2 == value or current_variant.option3 == value %}
+                      {% assign is_active = true %}
+                    {% endif %}
+                    <button
+                      type="button"
+                      class="variant-selector__btn{% if is_active %} variant-selector__btn--active{% endif %}{% unless is_available %} variant-selector__btn--unavailable{% endunless %}"
+                      data-option-name="{{ option.name | escape }}"
+                      data-option-value="{{ value | escape }}"
+                      {% unless is_available %}disabled{% endunless %}
+                    >
+                      {{ value }}
+                    </button>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endunless %}
+
+        <div class="product-page__actions">
+          <div class="quantity-selector">
+            <button type="button" class="quantity-selector__btn" data-quantity-minus>&minus;</button>
+            <input
+              type="number"
+              name="quantity"
+              value="1"
+              min="1"
+              class="quantity-selector__input"
+              data-quantity-input
+            >
+            <button type="button" class="quantity-selector__btn" data-quantity-plus>+</button>
+          </div>
+
+          <button
+            type="submit"
+            name="add"
+            class="atc-btn"
+            data-add-to-cart
+            {% unless current_variant.available %}disabled{% endunless %}
+          >
+            <span data-add-to-cart-text>
+              {% if current_variant.available %}
+                {{ 'product.add_to_cart' | t }}
+              {% else %}
+                {{ 'product.sold_out' | t }}
+              {% endif %}
+            </span>
+          </button>
+        </div>
+
+        {% if section.settings.show_dynamic_checkout %}
+          {{ form | payment_button }}
+        {% endif %}
+      {% endform %}
+
+      {% if section.settings.show_description or section.settings.show_dimensions or section.settings.show_materials or section.settings.show_care %}
+        <div class="product-tabs" data-product-tabs>
+          <div class="product-tabs__nav">
+            {% if section.settings.show_description and product.description != blank %}
+              <button class="product-tabs__tab product-tabs__tab--active" data-tab="description">{{ 'product.description' | t }}</button>
+            {% endif %}
+            {% if section.settings.show_materials %}
+              <button class="product-tabs__tab" data-tab="materials" {% unless product.description != blank %}style="border-bottom-color:#C17F59;color:#C17F59;"{% endunless %}>{{ 'product.materials' | t }}</button>
+            {% endif %}
+            {% if section.settings.show_dimensions %}
+              <button class="product-tabs__tab" data-tab="dimensions">{{ 'product.dimensions' | t }}</button>
+            {% endif %}
+            {% if section.settings.show_care %}
+              <button class="product-tabs__tab" data-tab="care">{{ 'product.care' | t }}</button>
+            {% endif %}
+          </div>
+
+          {% if section.settings.show_description and product.description != blank %}
+            <div class="product-tabs__content product-tabs__content--active" data-tab-content="description">
+              {{ product.description }}
+            </div>
+          {% endif %}
+
+          {% if section.settings.show_materials %}
+            <div class="product-tabs__content" data-tab-content="materials">
+              {{ section.settings.materials_text }}
+            </div>
+          {% endif %}
+
+          {% if section.settings.show_dimensions %}
+            <div class="product-tabs__content" data-tab-content="dimensions">
+              {% if section.settings.dimensions_text != blank %}
+                {{ section.settings.dimensions_text }}
+              {% endif %}
+              <table class="product-tabs__specs" style="margin-top:16px;">
+                <tbody>
+                  {% for block in section.blocks %}
+                    <tr>
+                      <td class="product-tabs__spec-label">{{ block.settings.label }}</td>
+                      <td class="product-tabs__spec-value">{{ block.settings.value }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+
+          {% if section.settings.show_care %}
+            <div class="product-tabs__content" data-tab-content="care">
+              {{ section.settings.care_text }}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var productSection = document.querySelector('[data-section-type="product"]');
+    if (!productSection) return;
+
+    var productData = {{ product | json }};
+    var form = productSection.querySelector('[data-product-form]');
+    var selectInput = productSection.querySelector('[data-product-select]');
+    var priceDisplay = productSection.querySelector('[data-product-price]');
+    var comparePriceDisplay = productSection.querySelector('[data-compare-price]');
+    var addToCartText = productSection.querySelector('[data-add-to-cart-text]');
+    var addToCartBtn = productSection.querySelector('[data-add-to-cart]');
+    var quantityInput = productSection.querySelector('[data-quantity-input]');
+    var imageEl = document.getElementById('product-main-image');
+
+    function findVariant(selectedOptions) {
+      return productData.variants.find(function(variant) {
+        var match = true;
+        for (var i = 0; i < selectedOptions.length; i++) {
+          if (variant['option' + (i + 1)] !== selectedOptions[i]) {
+            match = false;
+            break;
+          }
+        }
+        return match;
+      });
+    }
+
+    function getSelectedOptions() {
+      var optionSelectors = productSection.querySelectorAll('[data-variants] .variant-selector');
+      var selected = [];
+      optionSelectors.forEach(function(selector, index) {
+        var activeBtn = selector.querySelector('.variant-selector__btn--active');
+        if (activeBtn) {
+          selected[index] = activeBtn.getAttribute('data-option-value');
+        } else {
+          var firstAvailable = selector.querySelector('.variant-selector__btn:not(.variant-selector__btn--unavailable)');
+          if (firstAvailable) {
+            selected[index] = firstAvailable.getAttribute('data-option-value');
+          }
+        }
+      });
+      return selected;
+    }
+
+    function updateFromVariant(variant) {
+      if (!variant) return;
+      selectInput.value = variant.id;
+      if (priceDisplay) {
+        priceDisplay.textContent = Shopify.formatMoney(variant.price, '{{ shop.money_format | escape }}');
+      }
+      if (comparePriceDisplay && variant.compare_at_price > variant.price) {
+        comparePriceDisplay.textContent = Shopify.formatMoney(variant.compare_at_price, '{{ shop.money_format | escape }}');
+        comparePriceDisplay.style.display = 'inline';
+      } else if (comparePriceDisplay) {
+        comparePriceDisplay.style.display = 'none';
+      }
+      if (variant.available) {
+        addToCartBtn.disabled = false;
+        addToCartText.textContent = '{{ "product.add_to_cart" | t }}';
+      } else {
+        addToCartBtn.disabled = true;
+        addToCartText.textContent = '{{ "product.sold_out" | t }}';
+      }
+      if (variant.featured_image && imageEl) {
+        imageEl.src = variant.featured_image.src;
+        imageEl.alt = variant.featured_image.alt;
+      }
+    }
+
+    function updateAvailability() {
+      var optionSelectors = productSection.querySelectorAll('[data-variants] .variant-selector');
+      var selectedOptions = getSelectedOptions();
+
+      optionSelectors.forEach(function(selector, optionIndex) {
+        var buttons = selector.querySelectorAll('.variant-selector__btn');
+        buttons.forEach(function(button) {
+          var testOptions = selectedOptions.slice();
+          testOptions[optionIndex] = button.getAttribute('data-option-value');
+          var variant = findVariant(testOptions);
+          if (variant && variant.available) {
+            button.classList.remove('variant-selector__btn--unavailable');
+            button.disabled = false;
+          } else {
+            button.classList.add('variant-selector__btn--unavailable');
+            button.disabled = true;
+          }
+        });
+      });
+    }
+
+    productSection.addEventListener('click', function(e) {
+      var button = e.target.closest('.variant-selector__btn');
+      if (!button || button.disabled || button.classList.contains('variant-selector__btn--unavailable')) return;
+
+      var optionName = button.getAttribute('data-option-name');
+      var optionValue = button.getAttribute('data-option-value');
+      var selector = button.closest('.variant-selector');
+
+      selector.querySelectorAll('.variant-selector__btn').forEach(function(b) {
+        b.classList.remove('variant-selector__btn--active');
+      });
+      button.classList.add('variant-selector__btn--active');
+
+      updateAvailability();
+      var selected = getSelectedOptions();
+      if (selected.filter(Boolean).length === selected.length) {
+        var variant = findVariant(selected);
+        if (variant) updateFromVariant(variant);
+      }
+    });
+
+    var minusBtn = productSection.querySelector('[data-quantity-minus]');
+    var plusBtn = productSection.querySelector('[data-quantity-plus]');
+    if (minusBtn) {
+      minusBtn.addEventListener('click', function() {
+        var val = parseInt(quantityInput.value) || 1;
+        if (val > 1) quantityInput.value = val - 1;
+      });
+    }
+    if (plusBtn) {
+      plusBtn.addEventListener('click', function() {
+        var val = parseInt(quantityInput.value) || 0;
+        quantityInput.value = val + 1;
+      });
+    }
+
+    var tabButtons = productSection.querySelectorAll('[data-product-tabs] .product-tabs__tab');
+    tabButtons.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        var tabGroup = this.closest('[data-product-tabs]');
+        tabGroup.querySelectorAll('.product-tabs__tab--active').forEach(function(t) {
+          t.classList.remove('product-tabs__tab--active');
+        });
+        tabGroup.querySelectorAll('.product-tabs__content--active').forEach(function(c) {
+          c.classList.remove('product-tabs__content--active');
+        });
+        this.classList.add('product-tabs__tab--active');
+        var target = tabGroup.querySelector('[data-tab-content="' + this.getAttribute('data-tab') + '"]');
+        if (target) target.classList.add('product-tabs__content--active');
+      });
+    });
+
+    updateAvailability();
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Product Page",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_dynamic_checkout",
+      "label": "Show dynamic checkout button",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Product Tabs"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show Description tab",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_materials",
+      "label": "Show Materials tab",
+      "default": true
+    },
+    {
+      "type": "richtext",
+      "id": "materials_text",
+      "label": "Materials content",
+      "default": "<p>Crafted from natural, sustainably sourced materials. Each piece is unique with subtle variations in texture and tone that celebrate the art of handmade craftsmanship.</p><p><strong>Primary materials:</strong> Natural cotton rope, linen, solid beechwood, organic soy wax, unglazed ceramic.</p>"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dimensions",
+      "label": "Show Dimensions tab",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "dimensions_text",
+      "label": "Dimensions intro text"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_care",
+      "label": "Show Care tab",
+      "default": true
+    },
+    {
+      "type": "richtext",
+      "id": "care_text",
+      "label": "Care instructions",
+      "default": "<p><strong>General care:</strong></p><ul><li>Spot clean with a damp cloth for most items.</li><li>Avoid prolonged direct sunlight to preserve natural colors.</li><li>Hand wash cotton rope items in cold water; reshape and air dry flat.</li><li>Ceramic pieces are dishwasher safe unless otherwise noted.</li><li>Wood items: wipe clean, occasional food-grade mineral oil treatment recommended.</li></ul>"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "spec",
+      "name": "Product Spec",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label"
+        },
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Value"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

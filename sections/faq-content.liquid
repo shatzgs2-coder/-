@@ -1,108 +1,32 @@
-<section class="faq-section">
-  <div class="container">
-    <div class="section-heading">
-      <h2 class="section-heading__title">{{ 'faq.title' | t }}</h2>
-      <p class="section-heading__subtitle">{{ 'faq.subtitle' | t }}</p>
-    </div>
-
-    <div class="faq-categories">
-      <button class="faq-category-btn active" data-category="all">All</button>
-      <button class="faq-category-btn" data-category="shipping">{{ 'faq.shipping' | t }}</button>
-      <button class="faq-category-btn" data-category="products">{{ 'faq.products' | t }}</button>
-      <button class="faq-category-btn" data-category="orders">{{ 'faq.orders' | t }}</button>
-      <button class="faq-category-btn" data-category="payment">{{ 'faq.payment' | t }}</button>
-    </div>
+<section class="section">
+  <div class="section__inner" style="max-width:720px;">
+    <h1 class="section__heading">Frequently Asked Questions</h1>
+    <p class="section__subtitle">Quick answers to common questions.</p>
 
     <div class="faq-list">
-      <div class="faq-item" data-category="shipping">
-        <div class="faq-item__question">
-          How long does shipping take?
-          <span class="faq-item__arrow">&#9660;</span>
-        </div>
-        <div class="faq-item__answer">
-          Shipping within Germany takes 2-4 business days. EU shipping takes 4-7 business days. We process all orders within 24 hours on business days.
-        </div>
+      <div class="faq-item">
+        <div class="faq-item__question" onclick="this.parentElement.classList.toggle('faq-item--open')">What materials do you use?</div>
+        <div class="faq-item__answer"><p>We prioritize natural, sustainable materials: cotton rope, linen, solid wood (beech, oak), unglazed ceramic, organic soy wax, and cotton. Every product page includes a detailed Materials tab.</p></div>
       </div>
-      <div class="faq-item" data-category="shipping">
-        <div class="faq-item__question">
-          Do you offer free shipping?
-          <span class="faq-item__arrow">&#9660;</span>
-        </div>
-        <div class="faq-item__answer">
-          Yes, we offer free standard shipping on all orders over €50 within Germany and the EU.
-        </div>
+      <div class="faq-item">
+        <div class="faq-item__question" onclick="this.parentElement.classList.toggle('faq-item--open')">Where do you ship from?</div>
+        <div class="faq-item__answer"><p>All orders ship from our warehouse in Germany. We ship to all EU countries with DHL.</p></div>
       </div>
-      <div class="faq-item" data-category="shipping">
-        <div class="faq-item__question">
-          Do you ship internationally?
-          <span class="faq-item__arrow">&#9660;</span>
-        </div>
-        <div class="faq-item__answer">
-          Currently we ship to all EU countries. For orders outside the EU, please contact us and we'll check availability.
-        </div>
+      <div class="faq-item">
+        <div class="faq-item__question" onclick="this.parentElement.classList.toggle('faq-item--open')">How long does delivery take?</div>
+        <div class="faq-item__answer"><p>Germany: 2-4 business days. EU: 4-7 business days. Orders placed before 14:00 CET ship the same day.</p></div>
       </div>
-      <div class="faq-item" data-category="products">
-        <div class="faq-item__question">
-          What materials are your products made of?
-          <span class="faq-item__arrow">&#9660;</span>
-        </div>
-        <div class="faq-item__answer">
-          Our products use natural materials including soy wax, premium essential oils, handwoven rattan, and organic cotton. Each product page lists detailed material information.
-        </div>
+      <div class="faq-item">
+        <div class="faq-item__question" onclick="this.parentElement.classList.toggle('faq-item--open')">Can I return an item?</div>
+        <div class="faq-item__answer"><p>Yes! You have 30 days from delivery to return any unused item in its original packaging. See our <a href="/pages/shipping" style="color:#C17F59;text-decoration:underline;">Shipping & Returns</a> page for details.</p></div>
       </div>
-      <div class="faq-item" data-category="products">
-        <div class="faq-item__question">
-          Are your products eco-friendly?
-          <span class="faq-item__arrow">&#9660;</span>
-        </div>
-        <div class="faq-item__answer">
-          Yes, sustainability is at our core. We use biodegradable materials, minimal plastic packaging, and our soy wax candles are 100% natural and vegan.
-        </div>
+      <div class="faq-item">
+        <div class="faq-item__question" onclick="this.parentElement.classList.toggle('faq-item--open')">Are your products handmade?</div>
+        <div class="faq-item__answer"><p>Yes. The majority of our products are handcrafted by skilled artisans. This means each piece has natural variations in texture, color, and finish — that's the beauty of wabi-sabi.</p></div>
       </div>
-      <div class="faq-item" data-category="orders">
-        <div class="faq-item__question">
-          Can I modify or cancel my order?
-          <span class="faq-item__arrow">&#9660;</span>
-        </div>
-        <div class="faq-item__answer">
-          Orders can be modified or cancelled within 2 hours of placement. Please contact us immediately with your order number.
-        </div>
-      </div>
-      <div class="faq-item" data-category="orders">
-        <div class="faq-item__question">
-          How do I track my order?
-          <span class="faq-item__arrow">&#9660;</span>
-        </div>
-        <div class="faq-item__answer">
-          Once your order ships, you'll receive a confirmation email with a tracking number. You can track your package through the carrier's website.
-        </div>
-      </div>
-      <div class="faq-item" data-category="orders">
-        <div class="faq-item__question">
-          What is your return policy?
-          <span class="faq-item__arrow">&#9660;</span>
-        </div>
-        <div class="faq-item__answer">
-          We offer a 30-day return policy. Items must be unused and in original packaging. Visit our Shipping page for the complete return process.
-        </div>
-      </div>
-      <div class="faq-item" data-category="payment">
-        <div class="faq-item__question">
-          What payment methods do you accept?
-          <span class="faq-item__arrow">&#9660;</span>
-        </div>
-        <div class="faq-item__answer">
-          We accept Visa, Mastercard, PayPal, Apple Pay, Google Pay, and Klarna (pay later/pay in installments).
-        </div>
-      </div>
-      <div class="faq-item" data-category="payment">
-        <div class="faq-item__question">
-          Is my payment secure?
-          <span class="faq-item__arrow">&#9660;</span>
-        </div>
-        <div class="faq-item__answer">
-          Absolutely. All payments are processed through SSL-encrypted connections using Shopify's secure payment gateway. We never store your credit card information.
-        </div>
+      <div class="faq-item">
+        <div class="faq-item__question" onclick="this.parentElement.classList.toggle('faq-item--open')">Do you offer wholesale?</div>
+        <div class="faq-item__answer"><p>We're currently building our wholesale program. Reach out at hello@aeladaily.com and we'll be happy to discuss.</p></div>
       </div>
     </div>
   </div>
@@ -111,6 +35,12 @@
 {% schema %}
 {
   "name": "FAQ Content",
-  "settings": []
+  "settings": [],
+  "presets": [
+    {
+      "name": "FAQ Content",
+      "category": "Page"
+    }
+  ]
 }
 {% endschema %}
