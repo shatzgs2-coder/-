@@ -1,0 +1,19 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {}
+    },
+    "featured-collection": {
+      "type": "featured-collection",
+      "settings": {
+        "title": "Featured Products",
+        "subtitle": "Our best-selling wabi-sabi home essentials"
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "featured-collection"
+  ]
+}

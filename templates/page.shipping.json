@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "shipping-info": {
+      "type": "shipping-info",
+      "settings": {}
+    }
+  },
+  "order": [
+    "shipping-info"
+  ]
+}

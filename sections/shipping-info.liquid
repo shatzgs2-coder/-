@@ -1,0 +1,72 @@
+<section class="shipping-section">
+  <div class="container">
+    <div class="section-heading">
+      <h2 class="section-heading__title">{{ 'shipping.title' | t }}</h2>
+      <p class="section-heading__subtitle">{{ 'shipping.subtitle' | t }}</p>
+    </div>
+
+    <h3 style="font-size:20px;font-weight:700;margin-bottom:16px">{{ 'shipping.rates' | t }}</h3>
+
+    <table class="shipping-table">
+      <thead>
+        <tr>
+          <th>{{ 'shipping.destination' | t: 'Region' }}</th>
+          <th>{{ 'cart.price' | t }}</th>
+          <th>{{ 'shipping.delivery_time' | t: 'Delivery Time' }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ 'shipping.germany' | t }}</td>
+          <td class="highlight">€4.90</td>
+          <td>2-4 {{ 'shipping.days' | t }}</td>
+        </tr>
+        <tr>
+          <td>{{ 'shipping.eu' | t }}</td>
+          <td class="highlight">€8.90</td>
+          <td>4-7 {{ 'shipping.days' | t }}</td>
+        </tr>
+        <tr>
+          <td>{{ 'shipping.free' | t }}</td>
+          <td class="highlight">Free</td>
+          <td>{{ 'shipping.free_condition' | t }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-heading" style="margin-top:60px">
+      <h2 class="section-heading__title">{{ 'shipping.returns_title' | t }}</h2>
+      <p class="section-heading__subtitle">{{ 'shipping.returns_subtitle' | t }}</p>
+    </div>
+
+    <div class="returns-steps">
+      <div class="returns-step">
+        <div class="returns-step__number">1</div>
+        <h4 class="returns-step__title">Contact Us</h4>
+        <p class="returns-step__desc">Email us at hello@aeladaily.com with your order number and reason for return.</p>
+      </div>
+      <div class="returns-step">
+        <div class="returns-step__number">2</div>
+        <h4 class="returns-step__title">Pack Item</h4>
+        <p class="returns-step__desc">Place unused items in original packaging. Include your order confirmation.</p>
+      </div>
+      <div class="returns-step">
+        <div class="returns-step__number">3</div>
+        <h4 class="returns-step__title">Ship Back</h4>
+        <p class="returns-step__desc">We'll provide a return label. Drop off at your nearest DHL/Deutsche Post location.</p>
+      </div>
+      <div class="returns-step">
+        <div class="returns-step__number">4</div>
+        <h4 class="returns-step__title">Get Refund</h4>
+        <p class="returns-step__desc">Refund processed within 5 business days after we receive and inspect the return.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Shipping Info",
+  "settings": []
+}
+{% endschema %}

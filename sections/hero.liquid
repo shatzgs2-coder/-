@@ -1,0 +1,41 @@
+<section class="hero">
+  <div class="container">
+    <h1 class="hero__title">{{ 'homepage.hero_title' | t }}</h1>
+    <p class="hero__subtitle">{{ 'homepage.hero_subtitle' | t }}</p>
+    <div class="hero__cta">
+      <a href="/collections/all" class="btn btn-primary">{{ 'homepage.shop_now' | t }}</a>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Wabi-Sabi Living"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Handcrafted home goods for a mindful, serene space"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    }
+  ]
+}
+{% endschema %}

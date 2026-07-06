@@ -1,0 +1,73 @@
+<section class="contact-section">
+  <div class="container">
+    <div class="section-heading">
+      <h2 class="section-heading__title">{{ 'contact.title' | t }}</h2>
+      <p class="section-heading__subtitle">{{ 'contact.subtitle' | t }}</p>
+    </div>
+
+    <div class="contact-grid">
+      <div class="contact-form">
+        {% form 'contact' %}
+          {% if form.posted_successfully? %}
+            <p style="color:var(--color-accent);margin-bottom:20px">Thank you! We'll get back to you within 24 hours.</p>
+          {% endif %}
+
+          <div class="contact-form__group">
+            <label for="ContactFormName">{{ 'contact.name' | t }}</label>
+            <input type="text" id="ContactFormName" name="contact[name]" placeholder="Your name" required>
+          </div>
+
+          <div class="contact-form__group">
+            <label for="ContactFormEmail">{{ 'contact.email' | t }}</label>
+            <input type="email" id="ContactFormEmail" name="contact[email]" placeholder="your@email.com" required>
+          </div>
+
+          <div class="contact-form__group">
+            <label for="ContactFormMessage">{{ 'contact.message' | t }}</label>
+            <textarea id="ContactFormMessage" name="contact[body]" placeholder="How can we help you?" required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary">{{ 'contact.send' | t }}</button>
+        {% endform %}
+      </div>
+
+      <div class="contact-info">
+        <div class="contact-info__item">
+          <div class="contact-info__icon">&#9993;</div>
+          <div>
+            <div class="contact-info__label">{{ 'contact.email_label' | t }}</div>
+            <div class="contact-info__value">hello@aeladaily.com</div>
+          </div>
+        </div>
+
+        <div class="contact-info__item">
+          <div class="contact-info__icon">&#9742;</div>
+          <div>
+            <div class="contact-info__label">{{ 'contact.phone' | t }}</div>
+            <div class="contact-info__value">+49 (0) 123 456789</div>
+          </div>
+        </div>
+
+        <div class="contact-info__item">
+          <div class="contact-info__icon">&#9906;</div>
+          <div>
+            <div class="contact-info__label">{{ 'contact.address' | t }}</div>
+            <div class="contact-info__value">Musterstrasse 123<br>10115 Berlin, Germany</div>
+          </div>
+        </div>
+
+        <div class="contact-hours">
+          <div class="contact-hours__title">{{ 'contact.hours' | t }}</div>
+          <div class="contact-hours__text">{{ 'contact.hours_text' | t }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Contact Form",
+  "settings": []
+}
+{% endschema %}

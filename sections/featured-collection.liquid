@@ -1,0 +1,72 @@
+<section class="section-spacing featured-collection">
+  <div class="container">
+    <div class="section-heading">
+      <h2 class="section-heading__title">{{ section.settings.title }}</h2>
+      {% if section.settings.subtitle != blank %}
+      <p class="section-heading__subtitle">{{ section.settings.subtitle }}</p>
+      {% endif %}
+    </div>
+
+    <div class="product-grid">
+      {% assign collection = collections[section.settings.collection] %}
+      {% if collection %}
+        {% assign limit = section.settings.products_count | default: 4 %}
+        {% for product in collection.products limit: limit %}
+          {% render 'product-card', product: product %}
+        {% endfor %}
+      {% else %}
+        {% for i in (1..4) %}
+          <div class="product-card">
+            <div class="product-card__image">
+              {{ 'product-' | append: i | placeholder_svg_tag: 'placeholder-svg' }}
+            </div>
+            <div class="product-card__info">
+              <h3 class="product-card__title">Sample Product {{ i }}</h3>
+              <span class="product-card__price">€19.99</span>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Featured Collection",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Featured Products"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Our best-selling wabi-sabi home essentials"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_count",
+      "label": "Products to show",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 4
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Collection",
+      "category": "Collection"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,10 @@
+{
+  "general": {
+    "title": {
+      "label": "Store title"
+    },
+    "description": {
+      "label": "Store description"
+    }
+  }
+}

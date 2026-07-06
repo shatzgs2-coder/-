@@ -1,0 +1,89 @@
+<section class="section-spacing">
+  <div class="container">
+    <div class="product-main">
+      <div class="product-main__media">
+        {% if product.featured_media %}
+          <img
+            src="{{ product.featured_media | img_url: '1000x' }}"
+            alt="{{ product.featured_media.alt | escape }}"
+            width="500"
+            height="500"
+          >
+        {% else %}
+          {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg w-full' }}
+        {% endif %}
+      </div>
+
+      <div class="product-main__info">
+        <h1 class="product-main__title">{{ product.title }}</h1>
+
+        <div class="product-main__price">
+          {% if product.compare_at_price > product.price %}
+            <span class="product-card__compare-price" style="font-size:18px">{{ product.compare_at_price | money }}</span>
+          {% endif %}
+          {{ product.price | money }}
+        </div>
+
+        {% if product.description != blank %}
+          <div class="product-main__description">
+            {{ product.description }}
+          </div>
+        {% endif %}
+
+        <div class="product-main__specs">
+          <h3>{{ 'product.specifications' | t }}</h3>
+          {% if product.metafields.custom.material != blank %}
+            <p>Material: {{ product.metafields.custom.material }}</p>
+          {% endif %}
+          {% if product.metafields.custom.size != blank %}
+            <p>Size: {{ product.metafields.custom.size }}</p>
+          {% endif %}
+          {% if product.metafields.custom.scent != blank %}
+            <p>Scent: {{ product.metafields.custom.scent }}</p>
+          {% endif %}
+          {% if product.metafields.custom.usage != blank %}
+            <p>Usage: {{ product.metafields.custom.usage }}</p>
+          {% endif %}
+        </div>
+
+        {% form 'product', product %}
+          {% if product.variants.size > 1 %}
+            <div class="product-form__variants" style="margin-bottom:20px">
+              {% for variant in product.variants %}
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                  <input type="radio" name="id" value="{{ variant.id }}"
+                    {% if variant == product.selected_or_first_available_variant %}checked{% endif %}
+                    {% unless variant.available %}disabled{% endunless %}>
+                  <label>{{ variant.title }} - {{ variant.price | money }}</label>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          {% endif %}
+
+          <div class="product-form__quantity">
+            <label for="Quantity">{{ 'product.quantity' | t }}</label>
+            <input type="number" id="Quantity" name="quantity" value="1" min="1">
+          </div>
+
+          <button type="submit" name="add" class="btn btn-primary product-form__add-to-cart"
+            {% unless product.available %}disabled{% endunless %}>
+            {% if product.available %}
+              {{ 'product.add_to_cart' | t }}
+            {% else %}
+              {{ 'product.sold_out' | t }}
+            {% endif %}
+          </button>
+        {% endform %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Product Template",
+  "settings": []
+}
+{% endschema %}
