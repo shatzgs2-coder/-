@@ -8,10 +8,11 @@
     </div>
 
     <div class="product-grid">
-      {% assign collection = collections[section.settings.collection] %}
-      {% if collection and collection.products_count > 0 %}
+      {%- assign collection_handle = section.settings.collection -%}
+      {%- assign coll = collections[collection_handle] -%}
+      {% if coll != blank and coll.products.size > 0 %}
         {% assign limit = section.settings.products_count | default: 4 %}
-        {% for product in collection.products limit: limit %}
+        {% for product in coll.products limit: limit %}
           {% render 'product-card', product: product %}
         {% endfor %}
       {% else %}

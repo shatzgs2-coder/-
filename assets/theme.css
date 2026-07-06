@@ -611,6 +611,111 @@ a:hover {
 .product-form__add-to-cart {
   width: 100%;
   max-width: 300px;
+  margin-top: 8px;
+}
+
+.product-form__option {
+  margin-bottom: 20px;
+}
+
+.product-form__option-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 10px;
+}
+
+.product-form__selected-value {
+  font-weight: 400;
+  color: var(--color-accent);
+}
+
+.product-form__option-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.product-form__option-btn {
+  padding: 10px 18px;
+  border: 1px solid var(--color-muted);
+  border-radius: var(--radius-sm);
+  background: var(--color-white);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.product-form__option-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.product-form__option-btn.is-active {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-white);
+}
+
+.product-form__option-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.qty-control {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--color-muted);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-white);
+}
+
+.qty-control__btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.qty-control__btn:hover {
+  background: var(--color-muted);
+}
+
+.qty-control__input {
+  width: 50px;
+  height: 40px;
+  border: none;
+  border-left: 1px solid var(--color-muted);
+  border-right: 1px solid var(--color-muted);
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-text);
+  background: transparent;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.qty-control__input::-webkit-outer-spin-button,
+.qty-control__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .product-form__add-to-cart {
+    max-width: 100%;
+  }
 }
 
 /* === Collection Page === */
