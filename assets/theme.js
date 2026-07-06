@@ -43,7 +43,8 @@ document.addEventListener('DOMContentLoaded', function() {
   /* === Quantity Buttons === */
   var qtyBtns = document.querySelectorAll('.cart-item__quantity-btn');
   qtyBtns.forEach(function(btn) {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
       var input = this.parentElement.querySelector('.cart-item__quantity-value');
       if (!input) return;
       var val = parseInt(input.textContent) || 1;
@@ -51,6 +52,12 @@ document.addEventListener('DOMContentLoaded', function() {
         input.textContent = val + 1;
       } else if (this.classList.contains('minus') && val > 1) {
         input.textContent = val - 1;
+      }
+      // Trigger update if form present
+      var form = this.closest('form');
+      if (form) {
+        var nameInput = input.parentElement.querySelector('input[type="hidden"]');
+        if (nameInput) nameInput.value = input.textContent;
       }
     });
   });

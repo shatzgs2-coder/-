@@ -9,23 +9,53 @@
 
     <div class="product-grid">
       {% assign collection = collections[section.settings.collection] %}
-      {% if collection %}
+      {% if collection and collection.products_count > 0 %}
         {% assign limit = section.settings.products_count | default: 4 %}
         {% for product in collection.products limit: limit %}
           {% render 'product-card', product: product %}
         {% endfor %}
       {% else %}
-        {% for i in (1..4) %}
-          <div class="product-card">
-            <div class="product-card__image">
-              {{ 'product-' | append: i | placeholder_svg_tag: 'placeholder-svg' }}
-            </div>
-            <div class="product-card__info">
-              <h3 class="product-card__title">Sample Product {{ i }}</h3>
-              <span class="product-card__price">€19.99</span>
-            </div>
+        {%- comment -%} Demo products with real images when no collection is set {%- endcomment -%}
+        <a href="#" class="product-card">
+          <div class="product-card__image" style="background-image:url('https://images.unsplash.com/photo-1600166898405-da9535204843?w=600&h=600&fit=crop')">
+            <img src="https://images.unsplash.com/photo-1600166898405-da9535204843?w=600&h=600&fit=crop"
+                 alt="Ceramic Vase" loading="lazy">
           </div>
-        {% endfor %}
+          <div class="product-card__info">
+            <h3 class="product-card__title">Ceramic Wabi-Sabi Vase</h3>
+            <span class="product-card__price">€34.00</span>
+          </div>
+        </a>
+        <a href="#" class="product-card">
+          <div class="product-card__image" style="background-image:url('https://images.unsplash.com/photo-1586101904776-1a80b1c2a65f?w=600&h=600&fit=crop')">
+            <img src="https://images.unsplash.com/photo-1586101904776-1a80b1c2a65f?w=600&h=600&fit=crop"
+                 alt="Linen Throw Blanket" loading="lazy">
+          </div>
+          <div class="product-card__info">
+            <h3 class="product-card__title">Linen Throw Blanket</h3>
+            <span class="product-card__price">€58.00</span>
+          </div>
+        </a>
+        <a href="#" class="product-card">
+          <div class="product-card__image" style="background-image:url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&h=600&fit=crop')">
+            <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&h=600&fit=crop"
+                 alt="Wooden Tray Set" loading="lazy">
+          </div>
+          <div class="product-card__info">
+            <h3 class="product-card__title">Handmade Wooden Tray</h3>
+            <span class="product-card__price">€42.00</span>
+          </div>
+        </a>
+        <a href="#" class="product-card">
+          <div class="product-card__image" style="background-image:url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop')">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop"
+                 alt="Cotton Cushion Cover" loading="lazy">
+          </div>
+          <div class="product-card__info">
+            <h3 class="product-card__title">Organic Cotton Cushion</h3>
+            <span class="product-card__price">€28.00</span>
+          </div>
+        </a>
       {% endif %}
     </div>
   </div>
