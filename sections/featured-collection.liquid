@@ -15,15 +15,7 @@
       </div>
     {% else %}
       <div class="product-grid">
-        {% for i in (1..4) %}
-          <div class="product-card">
-            <div class="product-card__image">
-              <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400&h=400&fit=crop" alt="Demo product" loading="lazy">
-            </div>
-            <h3 class="product-card__title">Demo Product {{ i }}</h3>
-            <p class="product-card__price">Add products in Shopify Admin</p>
-          </div>
-        {% endfor %}
+        {% render 'demo-products' %}
       </div>
     {% endif %}
   </div>
