@@ -1,878 +1,1141 @@
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign featured_img = current_variant.featured_image | default: product.featured_image
+  assign has_color = false
+  for option in product.options_with_values
+    assign opt_lower = option.name | downcase
+    if opt_lower contains 'color' or opt_lower contains 'colour' or opt_lower contains 'farbe' or opt_lower contains '颜色' or opt_lower contains 'scent' or opt_lower contains '香型'
+      assign has_color = true
+      assign color_option_index = forloop.index0
+    endif
+  endfor
+  assign stock_total = 0
+  for variant in product.variants
+    if variant.inventory_quantity
+      assign stock_total = stock_total | plus: variant.inventory_quantity
+    endif
+  endfor
+-%}
+
 <style>
-  /* === Aela Daily — Product Page (Atelier Wabi design system) === */
-  .ad-product {
-    background: #faf7f2;
-    padding: 0;
-  }
-  .ad-product__inner {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: 80vh;
-  }
-  .ad-product__gallery {
-    background: #f0ebe1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 60px;
-    position: relative;
-    overflow: hidden;
-    min-height: 500px;
-  }
-  .ad-product__gallery img {
-    max-height: 600px;
-    width: 100%;
-    object-fit: contain;
-    border-radius: 8px;
-    transition: opacity 0.35s ease;
-  }
-  .ad-product__info {
-    padding: 80px 64px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    max-width: 560px;
-  }
-  .ad-product__type {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    color: #c17f59;
-    font-weight: 500;
-    margin-bottom: 12px;
-  }
-  .ad-product__title {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-    color: #2c2420;
-    font-weight: 400;
-    line-height: 1.15;
-    margin-bottom: 16px;
-  }
-  .ad-product__price {
-    font-size: 1.3rem;
-    color: #8b7355;
-    font-weight: 400;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-  }
-  .ad-product__price-compare {
-    font-size: 1rem;
-    color: #c4a882;
-    text-decoration: line-through;
-  }
-  .ad-product__divider {
-    height: 1px;
-    background: #e8e3d8;
-    margin: 28px 0;
+  /* ── CSS Custom Properties ── */
+  :root {
+    --aw-charcoal: #2c2420; --aw-earth: #8b7355; --aw-terracotta: #c17f59;
+    --aw-clay: #a0522d; --aw-stone: #8a7e72; --aw-cream: #faf7f2;
+    --aw-linen: #ede8e1; --aw-wheat: #f3efe8; --aw-sand: #e8e2d8;
+    --aw-mist: #f5f2ed; --aw-sage: #7a8b6f; --aw-charcoal-light: #4a3f3a;
+    --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px;
+    --shadow-soft: 0 2px 16px rgba(44,36,32,.06);
+    --shadow-card: 0 4px 24px rgba(44,36,32,.08);
+    --ease-out: cubic-bezier(.25,.8,.25,1);
+    --font-heading: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'Inter', -apple-system, sans-serif;
   }
 
-  /* === Variant Selectors === */
-  .ad-variant-group {
-    margin-bottom: 24px;
+  /* ── Product Page Container ── */
+  .aw-pdp { padding: 64px 40px; background: var(--aw-cream); min-height: 70vh; }
+  .aw-pdp__inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 72px; align-items: start; }
+
+  /* ── GALLERY ── */
+  .aw-pdp__gallery { position: sticky; top: 100px; }
+  .aw-pdp__main-wrap { position: relative; }
+  .aw-pdp__main-img {
+    aspect-ratio: 1; background: var(--aw-linen); border-radius: var(--radius-lg);
+    overflow: hidden; box-shadow: var(--shadow-soft); position: relative;
   }
-  .ad-variant-group__label {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: #2c2420;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .aw-pdp__main-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s var(--ease-out); }
+  .aw-pdp__main-img:hover img { transform: scale(1.04); }
+
+  /* Sale / Low Stock Badge on image */
+  .aw-pdp__badge {
+    position: absolute; top: 16px; left: 16px; z-index: 2;
+    padding: 6px 14px; border-radius: 20px; font-size: .75rem;
+    font-weight: 600; letter-spacing: .8px; text-transform: uppercase;
   }
-  .ad-variant-group__label span {
-    font-weight: 400;
-    color: #8b7355;
-    font-size: 0.8rem;
-    text-transform: none;
-    letter-spacing: 0;
+  .aw-pdp__badge--sale { background: var(--aw-terracotta); color: #fff; }
+  .aw-pdp__badge--lowstock { background: #2c2420; color: #faf7f2; top: 52px; }
+  .aw-pdp__badge--bestseller { background: var(--aw-earth); color: #fff; top: 88px; }
+
+  /* Gallery arrows */
+  .aw-pdp__gallery-arrows { display: none; }
+  .aw-pdp__gallery-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
+    width: 40px; height: 40px; border-radius: 50%; background: rgba(250,247,242,.9);
+    border: 1px solid var(--aw-sand); cursor: pointer; display: flex;
+    align-items: center; justify-content: center; font-size: 1.1rem;
+    color: var(--aw-charcoal); transition: all .2s; box-shadow: var(--shadow-soft);
   }
+  .aw-pdp__gallery-arrow:hover { background: #fff; border-color: var(--aw-earth); }
+  .aw-pdp__gallery-arrow--prev { left: 12px; }
+  .aw-pdp__gallery-arrow--next { right: 12px; }
+
+  /* Thumbnails */
+  .aw-pdp__thumbs { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .aw-pdp__thumb {
+    width: 72px; height: 72px; border-radius: 8px; overflow: hidden;
+    cursor: pointer; border: 2px solid transparent; transition: border-color .25s;
+    background: var(--aw-wheat); padding: 0;
+  }
+  .aw-pdp__thumb:hover, .aw-pdp__thumb.active { border-color: var(--aw-earth); }
+  .aw-pdp__thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* Zoom indicator */
+  .aw-pdp__zoom-hint {
+    position: absolute; bottom: 12px; right: 12px; z-index: 2;
+    font-size: .75rem; color: var(--aw-stone); background: rgba(250,247,242,.85);
+    padding: 4px 10px; border-radius: 12px; letter-spacing: .5px;
+  }
+
+  /* ── PRODUCT INFO ── */
+  .aw-pdp__info { padding-top: 4px; }
+  .aw-pdp__vendor {
+    font-size: .7rem; color: var(--aw-terracotta); text-transform: uppercase;
+    letter-spacing: 3px; margin-bottom: 8px; font-weight: 500;
+  }
+  .aw-pdp__title {
+    font-family: var(--font-heading); font-size: clamp(1.8rem,3.5vw,2.8rem);
+    color: var(--aw-charcoal); line-height: 1.15; margin-bottom: 14px; font-weight: 600;
+  }
+
+  /* Price */
+  .aw-pdp__price-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+  .aw-pdp__price {
+    font-family: var(--font-heading); font-size: 1.75rem; color: var(--aw-earth);
+    font-weight: 600; line-height: 1;
+  }
+  .aw-pdp__compare { font-size: 1.1rem; color: var(--aw-stone); text-decoration: line-through; }
+  .aw-pdp__save {
+    font-size: .78rem; color: var(--aw-terracotta); font-weight: 600;
+    background: rgba(193,127,89,.1); padding: 3px 10px; border-radius: 12px; letter-spacing: .4px;
+  }
+
+  /* Stock indicator */
+  .aw-pdp__stock {
+    display: flex; align-items: center; gap: 8px; font-size: .82rem;
+    margin-bottom: 20px; color: var(--aw-charcoal-light);
+  }
+  .aw-pdp__stock-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .aw-pdp__stock-dot--in { background: #6b9b5c; }
+  .aw-pdp__stock-dot--low { background: #d4a24e; }
+  .aw-pdp__stock-dot--out { background: #c46060; }
+
+  /* Craft details strip */
+  .aw-pdp__craft-strip {
+    display: flex; gap: 20px; padding: 16px 0; margin-bottom: 24px;
+    border-top: 1px solid var(--aw-sand); border-bottom: 1px solid var(--aw-sand);
+    flex-wrap: wrap;
+  }
+  .aw-pdp__craft-item {
+    display: flex; flex-direction: column; gap: 2px; min-width: 80px;
+  }
+  .aw-pdp__craft-label { font-size: .65rem; text-transform: uppercase; letter-spacing: 1.8px; color: var(--aw-stone); }
+  .aw-pdp__craft-value { font-size: .88rem; color: var(--aw-charcoal); font-weight: 500; }
+
+  /* Divider */
+  .aw-pdp__divider { height: 1px; background: linear-gradient(to right, var(--aw-sand), transparent); margin: 28px 0; }
+
+  /* ── VARIANT SELECTORS ── */
+  .aw-variant-group { margin-bottom: 22px; }
+  .aw-variant-group__label {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: .78rem; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--aw-charcoal); margin-bottom: 8px; font-weight: 500;
+  }
+  .aw-variant-group__selected { font-size: .75rem; color: var(--aw-stone); text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+  /* Color swatches — circles */
+  .aw-color-options { display: flex; gap: 10px; flex-wrap: wrap; }
+  .aw-color-btn {
+    width: 44px; height: 44px; border-radius: 50%; border: 2px solid transparent;
+    cursor: pointer; padding: 3px; background: transparent; position: relative;
+    transition: all .25s var(--ease-out);
+  }
+  .aw-color-btn:hover { transform: scale(1.08); }
+  .aw-color-btn.selected { border-color: var(--aw-earth); box-shadow: 0 0 0 2px var(--aw-cream), 0 0 0 4px var(--aw-earth); }
+  .aw-color-btn:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+  .aw-color-btn__swatch {
+    display: block; width: 100%; height: 100%; border-radius: 50%;
+    border: 1px solid rgba(0,0,0,.08); box-shadow: inset 0 1px 3px rgba(0,0,0,.1);
+  }
+  .aw-color-btn__tooltip {
+    position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%);
+    font-size: .68rem; color: var(--aw-charcoal); white-space: nowrap;
+    opacity: 0; transition: opacity .2s; pointer-events: none; font-weight: 500;
+  }
+  .aw-color-btn:hover .aw-color-btn__tooltip { opacity: 1; }
 
   /* Size pills */
-  .ad-size-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+  .aw-size-options { display: flex; gap: 8px; flex-wrap: wrap; }
+  .aw-size-btn {
+    padding: 10px 18px; border: 1.5px solid var(--aw-sand); background: transparent;
+    border-radius: var(--radius-sm); font-size: .85rem; color: var(--aw-charcoal);
+    cursor: pointer; transition: all .25s var(--ease-out); min-width: 56px;
+    text-align: center; font-weight: 500; position: relative;
   }
-  .ad-size-btn {
-    min-width: 52px;
-    height: 42px;
-    padding: 0 20px;
-    border: 1.5px solid #d4cec4;
-    background: transparent;
-    border-radius: 6px;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 0.88rem;
-    color: #2c2420;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .aw-size-btn:hover { border-color: var(--aw-earth); color: var(--aw-earth); }
+  .aw-size-btn.selected { background: var(--aw-earth); color: #fff; border-color: var(--aw-earth); }
+  .aw-size-btn:disabled { opacity: .35; cursor: not-allowed; border-color: var(--aw-sand); color: var(--aw-stone); background: transparent; }
+  .aw-size-btn__dim {
+    display: block; font-size: .65rem; font-weight: 400; opacity: .7;
+    margin-top: 2px; letter-spacing: .3px;
   }
-  .ad-size-btn:hover:not(:disabled) {
-    border-color: #8b7355;
-    color: #8b7355;
-  }
-  .ad-size-btn--selected {
-    border-color: #8b7355;
-    background: #8b7355;
-    color: #fff;
-    font-weight: 500;
-  }
-  .ad-size-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-    text-decoration: line-through;
-  }
+  .aw-size-btn.selected .aw-size-btn__dim { opacity: .85; }
 
-  /* Color swatches */
-  .ad-color-options {
-    display: flex;
-    flex-wrap: wrap;
+  /* Quantity */
+  .aw-pdp__actions { display: flex; gap: 14px; margin-top: 28px; align-items: stretch; }
+  .aw-qty {
+    display: flex; border: 1.5px solid var(--aw-sand); border-radius: var(--radius-sm);
+    overflow: hidden; min-width: 120px;
+  }
+  .aw-qty__btn {
+    width: 44px; border: none; background: var(--aw-mist); cursor: pointer;
+    font-size: 1.1rem; color: var(--aw-charcoal); transition: background .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .aw-qty__btn:hover { background: var(--aw-sand); }
+  .aw-qty__btn:disabled { opacity: .3; cursor: not-allowed; }
+  .aw-qty__input {
+    width: 50px; border: none; text-align: center; font-size: .9rem;
+    background: #fff; color: var(--aw-charcoal); font-weight: 500;
+    -moz-appearance: textfield; font-family: var(--font-body);
+  }
+  .aw-qty__input::-webkit-inner-spin-button,
+  .aw-qty__input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+  /* ATC Button */
+  .aw-btn--atc {
+    flex: 1; padding: 16px 32px; border: none; background: var(--aw-earth);
+    color: #fff; font-size: .9rem; font-weight: 600; letter-spacing: 1.2px;
+    text-transform: uppercase; cursor: pointer; border-radius: var(--radius-sm);
+    transition: all .3s var(--ease-out); position: relative; overflow: hidden;
+    font-family: var(--font-body); min-height: 50px;
+  }
+  .aw-btn--atc:hover { background: var(--aw-charcoal); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(44,36,32,.15); }
+  .aw-btn--atc:active { transform: translateY(0); }
+  .aw-btn--atc:disabled { background: var(--aw-stone); cursor: not-allowed; transform: none; box-shadow: none; opacity: .7; }
+  .aw-btn--atc--waitlist { background: var(--aw-charcoal); }
+
+  /* Sticky ATC bar */
+  .aw-sticky-atc {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: var(--aw-cream);
+    border-top: 1px solid var(--aw-sand); padding: 14px 40px;
+    display: flex; align-items: center; gap: 20px;
+    transform: translateY(100%); transition: transform .35s var(--ease-out);
+    box-shadow: 0 -4px 24px rgba(44,36,32,.08);
+  }
+  .aw-sticky-atc.visible { transform: translateY(0); }
+  .aw-sticky-atc__img { width: 52px; height: 52px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: var(--aw-linen); }
+  .aw-sticky-atc__img img { width: 100%; height: 100%; object-fit: cover; }
+  .aw-sticky-atc__info { flex: 1; min-width: 0; }
+  .aw-sticky-atc__title { font-family: var(--font-heading); font-size: 1rem; color: var(--aw-charcoal); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .aw-sticky-atc__variant { font-size: .78rem; color: var(--aw-stone); }
+  .aw-sticky-atc .aw-btn--atc { flex: 0 0 auto; padding: 12px 28px; font-size: .82rem; min-height: auto; }
+
+  /* ── PRODUCT SECTIONS (inline, Citizenry-style) ── */
+  .aw-pdp__section { margin-top: 32px; }
+  .aw-pdp__section-title {
+    font-family: var(--font-heading); font-size: 1.35rem; color: var(--aw-charcoal);
+    margin-bottom: 14px; font-weight: 600;
+  }
+  .aw-pdp__story {
+    font-size: .95rem; color: var(--aw-charcoal-light); line-height: 1.85;
+  }
+  .aw-pdp__story p { margin-bottom: 14px; }
+  .aw-pdp__story p:last-child { margin-bottom: 0; }
+
+  /* Details grid */
+  .aw-pdp__details-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr));
     gap: 12px;
   }
-  .ad-color-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    background: #e0dcd5;
-    cursor: pointer;
-    position: relative;
-    transition: all 0.25s ease;
-    padding: 0;
-    outline: none;
+  .aw-pdp__detail-card {
+    background: var(--aw-mist); padding: 16px; border-radius: var(--radius-sm);
+    border: 1px solid var(--aw-sand);
   }
-  .ad-color-btn:hover:not(:disabled) {
-    transform: scale(1.1);
+  .aw-pdp__detail-icon { font-size: 1.2rem; margin-bottom: 4px; }
+  .aw-pdp__detail-label { font-size: .68rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--aw-stone); margin-bottom: 4px; }
+  .aw-pdp__detail-value { font-size: .9rem; color: var(--aw-charcoal); font-weight: 500; line-height: 1.4; }
+
+  /* Artisan block */
+  .aw-pdp__artisan {
+    background: var(--aw-mist); border-radius: var(--radius-md); padding: 24px 28px;
+    border: 1px solid var(--aw-sand); display: flex; gap: 20px; align-items: center;
   }
-  .ad-color-btn--selected {
-    border-color: #2c2420;
-    box-shadow: 0 0 0 3px #faf7f2, 0 0 0 4.5px #8b7355;
-    transform: scale(1.08);
+  .aw-pdp__artisan-icon {
+    font-size: 2.5rem; flex-shrink: 0; width: 64px; height: 64px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--aw-cream); border-radius: 50%; border: 1px solid var(--aw-sand);
   }
-  .ad-color-btn:disabled {
-    opacity: 0.25;
-    cursor: not-allowed;
-    transform: none;
+  .aw-pdp__artisan-content { flex: 1; }
+  .aw-pdp__artisan-name { font-family: var(--font-heading); font-size: 1.15rem; color: var(--aw-charcoal); margin-bottom: 4px; font-weight: 600; }
+  .aw-pdp__artisan-meta {
+    font-size: .82rem; color: var(--aw-stone); line-height: 1.6;
+    display: flex; gap: 16px; flex-wrap: wrap;
   }
-  .ad-color-btn__swatch {
-    display: block;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-  }
-  .ad-color-btn__tooltip {
-    position: absolute;
-    bottom: -28px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.65rem;
-    color: #6b5e53;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.2s;
-    pointer-events: none;
-  }
-  .ad-color-btn:hover .ad-color-btn__tooltip {
-    opacity: 1;
+  .aw-pdp__artisan-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: .75rem; color: var(--aw-sage); font-weight: 600;
+    background: rgba(122,139,111,.08); padding: 4px 12px; border-radius: 12px;
   }
 
-  /* Quantity selector */
-  .ad-qty {
-    display: flex;
-    align-items: center;
-    width: fit-content;
-    border: 1.5px solid #d4cec4;
-    border-radius: 6px;
-    overflow: hidden;
-    margin-bottom: 24px;
+  /* Care / Shipping blocks */
+  .aw-pdp__care {
+    font-size: .9rem; color: var(--aw-charcoal-light); line-height: 1.75;
+    display: flex; gap: 14px; align-items: flex-start;
   }
-  .ad-qty__btn {
-    width: 42px;
-    height: 44px;
-    border: none;
-    background: transparent;
-    font-size: 1.1rem;
-    color: #6b5e53;
-    cursor: pointer;
-    transition: background 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Inter', system-ui, sans-serif;
-  }
-  .ad-qty__btn:hover { background: #f0ebe1; }
-  .ad-qty__input {
-    width: 54px;
-    height: 44px;
-    border: none;
-    border-left: 1.5px solid #d4cec4;
-    border-right: 1.5px solid #d4cec4;
-    text-align: center;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 0.95rem;
-    color: #2c2420;
-    background: transparent;
-    -moz-appearance: textfield;
-  }
-  .ad-qty__input::-webkit-outer-spin-button,
-  .ad-qty__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .aw-pdp__care-icon { flex-shrink: 0; font-size: 1.2rem; margin-top: 2px; }
 
-  /* Action buttons */
-  .ad-product__actions {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  /* Trust strip */
+  .aw-pdp__trust {
+    display: flex; gap: 16px; padding: 18px 0; border-top: 1px solid var(--aw-sand);
+    margin-top: 28px; flex-wrap: wrap;
   }
-  .ad-atc-btn {
-    width: 100%;
-    height: 52px;
-    border: none;
-    background: #8b7355;
-    color: #fff;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 0.82rem;
-    font-weight: 500;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 50px;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+  .aw-pdp__trust-item {
+    display: flex; align-items: center; gap: 8px; font-size: .78rem;
+    color: var(--aw-stone);
   }
-  .ad-atc-btn:hover:not(:disabled) {
-    background: #2c2420;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 20px rgba(44,36,32,0.15);
+  .aw-pdp__trust-icon { font-size: 1rem; }
+
+  /* ── Notification toast ── */
+  .aw-pdp__toast {
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--aw-charcoal); color: #fff; padding: 14px 28px;
+    border-radius: 30px; font-size: .88rem; font-weight: 500; z-index: 200;
+    opacity: 0; transition: all .35s var(--ease-out); pointer-events: none;
+    box-shadow: 0 8px 30px rgba(44,36,32,.2);
   }
-  .ad-atc-btn:disabled {
-    background: #d4cec4;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-  .ad-atc-btn svg { width: 18px; height: 18px; }
-  .ad-buy-btn {
-    width: 100%;
-    height: 52px;
-    border: 1.5px solid #8b7355;
-    background: transparent;
-    color: #8b7355;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 0.82rem;
-    font-weight: 500;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 50px;
-    transition: all 0.3s ease;
-  }
-  .ad-buy-btn:hover {
-    background: #8b7355;
-    color: #fff;
+  .aw-pdp__toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .aw-pdp { padding: 32px 20px; }
+    .aw-pdp__inner { grid-template-columns: 1fr; gap: 40px; }
+    .aw-pdp__gallery { position: static; }
+    .aw-pdp__gallery-arrows { display: block; }
+    .aw-pdp__main-img { aspect-ratio: 4/3; }
+    .aw-pdp__thumbs { display: none; }
+    .aw-sticky-atc { padding: 12px 20px; }
+    .aw-sticky-atc__img { width: 42px; height: 42px; }
+    .aw-pdp__craft-strip { gap: 12px; }
+    .aw-pdp__details-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
-  /* === Product Tabs === */
-  .ad-product-tabs {
-    margin-top: 44px;
-  }
-  .ad-product-tabs__nav {
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid #e8e3d8;
-    margin-bottom: 20px;
-  }
-  .ad-product-tabs__tab {
-    padding: 12px 28px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: #6b5e53;
-    cursor: pointer;
-    border: none;
-    background: none;
-    border-bottom: 2px solid transparent;
-    transition: all 0.25s;
-    font-family: 'Inter', system-ui, sans-serif;
-  }
-  .ad-product-tabs__tab:hover { color: #c17f59; }
-  .ad-product-tabs__tab--active {
-    color: #c17f59;
-    border-bottom-color: #c17f59;
-  }
-  .ad-product-tabs__panel { display: none; }
-  .ad-product-tabs__panel--active { display: block; animation: adFadeIn 0.3s ease; }
-  @keyframes adFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-  .ad-product-tabs__panel p {
-    color: #6b5e53;
-    font-size: 0.9rem;
-    line-height: 1.85;
-    margin-bottom: 14px;
-  }
-  .ad-product-tabs__panel ul {
-    list-style: none;
-    padding: 0;
-    margin: 4px 0 16px;
-  }
-  .ad-product-tabs__panel ul li {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    font-size: 0.9rem;
-    color: #6b5e53;
-    padding: 5px 0;
-  }
-  .ad-product-tabs__panel ul li::before {
-    content: '✦';
-    color: #c17f59;
-    font-size: 0.5rem;
-    margin-top: 6px;
-    flex-shrink: 0;
-  }
-  .ad-specs-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85rem;
-  }
-  .ad-specs-table td {
-    padding: 10px 0;
-    border-bottom: 1px solid #f0ebe1;
-    color: #3a3a3a;
-    vertical-align: top;
-  }
-  .ad-specs-table td:first-child {
-    color: #8b7355;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 0.7rem;
-    width: 110px;
-    padding-right: 20px;
-  }
-
-  /* === Responsive === */
-  @media (max-width: 968px) {
-    .ad-product__inner {
-      grid-template-columns: 1fr;
-      min-height: auto;
-    }
-    .ad-product__gallery {
-      padding: 48px 24px;
-      min-height: 360px;
-    }
-    .ad-product__gallery img {
-      max-height: 400px;
-    }
-    .ad-product__info {
-      padding: 40px 24px;
-      max-width: 100%;
-    }
-  }
   @media (max-width: 480px) {
-    .ad-product__gallery { min-height: 300px; padding: 32px 16px; }
-    .ad-product__info { padding: 28px 16px; }
-    .ad-product-tabs__tab { padding: 10px 16px; font-size: 0.68rem; letter-spacing: 1px; }
+    .aw-pdp__actions { flex-direction: column; }
+    .aw-qty { min-width: 100%; }
+    .aw-qty__input { flex: 1; }
+    .aw-pdp__artisan { flex-direction: column; text-align: center; }
+    .aw-pdp__artisan-meta { justify-content: center; }
   }
 </style>
 
-<section
-  class="ad-product"
-  data-section-id="{{ section.id }}"
-  data-section-type="ad-product"
->
-  {%- assign current_variant = product.selected_or_first_available_variant -%}
+<section class="aw-pdp" data-product-section data-section="{{ section.id }}">
+  <div class="aw-pdp__inner">
 
-  <div class="ad-product__inner">
+    <!-- ══════ GALLERY ══════ -->
+    <div class="aw-pdp__gallery" data-product-gallery>
+      <div class="aw-pdp__main-wrap">
+        <div class="aw-pdp__main-img" id="pdp-main-container">
+          {%- if featured_img -%}
+            {{ featured_img | image_url: width: 1000 | image_tag:
+              id:'pdp-main-img',
+              loading:'eager',
+              alt: product.title | escape,
+              widths:'400,600,800,1000',
+              style:'width:100%;height:100%;object-fit:cover;display:block'
+            }}
+          {%- else -%}
+            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--aw-mist),var(--aw-sand))">
+              <span style="font-family:var(--font-heading);color:var(--aw-clay);font-size:2rem">Atelier Wabi</span>
+            </div>
+          {%- endif -%}
 
-    {% comment %}=== GALLERY ==={% endcomment %}
-    <div class="ad-product__gallery">
-      {%- if product.featured_image -%}
-        {{ product.featured_image | image_url: width: 900 | image_tag:
-          id: 'ad-product-featured',
-          loading: 'eager',
-          alt: product.featured_image.alt | default: product.title,
-          class: 'ad-product__main-img'
-        }}
-      {%- else -%}
-        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#c4a882;font-family:'Cormorant Garamond',serif;font-size:2rem;letter-spacing:4px;text-align:center">
-          {{ shop.name }}
+          {%- if current_variant.compare_at_price > current_variant.price -%}
+            <span class="aw-pdp__badge aw-pdp__badge--sale">Sale</span>
+          {%- endif -%}
+          {%- if stock_total <= 5 and stock_total > 0 -%}
+            <span class="aw-pdp__badge aw-pdp__badge--lowstock"
+              style="{% if current_variant.compare_at_price > current_variant.price %}top:52px{% endif %}">
+              Only {{ stock_total }} left
+            </span>
+          {%- endif -%}
+          {%- if product.tags contains 'bestseller' or product.tags contains 'best-seller' -%}
+            <span class="aw-pdp__badge aw-pdp__badge--bestseller"
+              style="{% if current_variant.compare_at_price > current_variant.price %}top:52px{% endif %}{% if stock_total <= 5 and stock_total > 0 %} top:88px{% endif %}">
+              Best Seller
+            </span>
+          {%- endif -%}
+          <span class="aw-pdp__zoom-hint">Hover to zoom</span>
         </div>
+
+        <!-- Arrows (mobile) -->
+        <div class="aw-pdp__gallery-arrows">
+          <button class="aw-pdp__gallery-arrow aw-pdp__gallery-arrow--prev" data-gallery-prev aria-label="Previous image">&#8249;</button>
+          <button class="aw-pdp__gallery-arrow aw-pdp__gallery-arrow--next" data-gallery-next aria-label="Next image">&#8250;</button>
+        </div>
+      </div>
+
+      <!-- Thumbnails -->
+      {%- if product.images.size > 1 -%}
+      <div class="aw-pdp__thumbs" data-gallery-thumbs>
+        {%- for image in product.images limit:6 -%}
+          <button
+            class="aw-pdp__thumb{% if forloop.first %} active{% endif %}"
+            data-image-index="{{ forloop.index0 }}"
+            data-image-url="{{ image | image_url: width: 1000 }}"
+            aria-label="View image {{ forloop.index }}"
+            type="button"
+          >
+            {{ image | image_url: width: 150 | image_tag:
+              alt: product.title | append: ' - ' | append: forloop.index,
+              loading:'lazy',
+              style:'width:100%;height:100%;object-fit:cover;display:block'
+            }}
+          </button>
+        {%- endfor -%}
+      </div>
       {%- endif -%}
     </div>
 
-    {% comment %}=== PRODUCT INFO ==={% endcomment %}
-    <div class="ad-product__info">
-      {%- if product.type != blank -%}
-        <p class="ad-product__type">{{ product.type }}</p>
-      {%- else -%}
-        <p class="ad-product__type">Home Decor</p>
-      {%- endif -%}
+    <!-- ══════ PRODUCT INFO ══════ -->
+    <div class="aw-pdp__info">
 
-      <h1 class="ad-product__title">{{ product.title }}</h1>
+      <!-- Vendor + Title -->
+      <p class="aw-pdp__vendor">{{ product.vendor | default: 'Atelier Wabi' }}</p>
+      <h1 class="aw-pdp__title">{{ product.title }}</h1>
 
-      <div class="ad-product__price" data-price-wrapper>
-        <span class="ad-product__price-current" data-product-price>
-          {{ current_variant.price | money }}
-        </span>
+      <!-- Price Row -->
+      <div class="aw-pdp__price-row" data-price-row>
         {%- if current_variant.compare_at_price > current_variant.price -%}
-          <span class="ad-product__price-compare" data-compare-price>
-            {{ current_variant.compare_at_price | money }}
+          <span class="aw-pdp__compare" data-compare-price>{{ current_variant.compare_at_price | money }}</span>
+          <span class="aw-pdp__price" data-current-price>{{ current_variant.price | money }}</span>
+          <span class="aw-pdp__save">
+            Save {{ current_variant.compare_at_price | minus: current_variant.price | money }}
           </span>
+        {%- else -%}
+          <span class="aw-pdp__price" data-current-price>{{ current_variant.price | money }}</span>
         {%- endif -%}
       </div>
 
-      <div class="ad-product__divider"></div>
+      <!-- Stock Status -->
+      <div class="aw-pdp__stock" data-stock-status>
+        {%- if current_variant.available -%}
+          {%- if current_variant.inventory_quantity and current_variant.inventory_quantity <= 5 -%}
+            <span class="aw-pdp__stock-dot aw-pdp__stock-dot--low"></span>
+            <span>Low stock — only {{ current_variant.inventory_quantity }} remaining</span>
+          {%- else -%}
+            <span class="aw-pdp__stock-dot aw-pdp__stock-dot--in"></span>
+            <span>In stock — ready to ship</span>
+          {%- endif -%}
+        {%- else -%}
+          <span class="aw-pdp__stock-dot aw-pdp__stock-dot--out"></span>
+          <span>Currently sold out — <a href="#waitlist" style="color:var(--aw-earth);text-decoration:underline;cursor:pointer" onclick="document.querySelector('.aw-btn--atc').scrollIntoView({behavior:'smooth'});return false">Join waitlist</a></span>
+        {%- endif -%}
+      </div>
 
-      {% comment %}=== VARIANT SELECTORS ==={% endcomment %}
-      {%- form 'product', product, id: 'ad-product-form', class: 'ad-product__form' -%}
-        <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id>
+      <!-- Craft Details Strip -->
+      <div class="aw-pdp__craft-strip">
+        <div class="aw-pdp__craft-item">
+          <span class="aw-pdp__craft-label">Origin</span>
+          <span class="aw-pdp__craft-value">{{ section.settings.origin | default: 'Handcrafted' }}</span>
+        </div>
+        <div class="aw-pdp__craft-item">
+          <span class="aw-pdp__craft-label">Material</span>
+          <span class="aw-pdp__craft-value">{{ section.settings.material_summary | default: 'Natural' }}</span>
+        </div>
+        <div class="aw-pdp__craft-item">
+          <span class="aw-pdp__craft-label">Craft Time</span>
+          <span class="aw-pdp__craft-value">{{ section.settings.craft_time | default: '2–4 days' }}</span>
+        </div>
+        <div class="aw-pdp__craft-item">
+          <span class="aw-pdp__craft-label">Shipping</span>
+          <span class="aw-pdp__craft-value">Free over €49</span>
+        </div>
+      </div>
 
-        {%- unless product.has_only_default_variant -%}
-          {%- for option in product.options_with_values -%}
-            {%- assign option_name_downcase = option.name | downcase -%}
-            {%- assign is_color = false -%}
-            {%- if option_name_downcase contains 'color' or option_name_downcase contains 'colour' or option_name_downcase contains 'farbe' or option_name_downcase contains '颜色' or option_name_downcase contains '香型' or option_name_downcase contains 'scent' -%}
-              {%- assign is_color = true -%}
-            {%- endif -%}
+      <!-- Short Description -->
+      {%- if product.description != blank -%}
+        <div class="aw-pdp__story">{{ product.description }}</div>
+      {%- else -%}
+        <p class="aw-pdp__story" style="font-size:.95rem;color:#6b5e53;line-height:1.85">
+          A handcrafted piece from our Atelier Wabi collection — where natural materials meet mindful design.
+          Each item carries the quiet beauty of imperfection, bringing warmth and authenticity to your space.
+        </p>
+      {%- endif -%}
 
-            <div class="ad-variant-group" data-option-index="{{ forloop.index0 }}">
-              <div class="ad-variant-group__label">
-                {{ option.name }}
-                <span data-selected-option></span>
+      <div class="aw-pdp__divider"></div>
+
+      <!-- ══════ VARIANT SELECTORS ══════ -->
+      {% form 'product', product, class:'aw-product-form', id:'pdp-form', data-product-form:'' %}
+        <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id-input>
+
+        {%- for option in product.options_with_values -%}
+          {%- assign is_color = false -%}
+          {%- assign opt_lower = option.name | downcase -%}
+          {%- if opt_lower contains 'color' or opt_lower contains 'colour' or opt_lower contains 'farbe' or opt_lower contains '颜色' or opt_lower contains 'scent' or opt_lower contains '香型' -%}
+            {%- assign is_color = true -%}
+          {%- endif -%}
+
+          <div class="aw-variant-group" data-option-index="{{ forloop.index0 }}" data-option-name="{{ option.name | escape }}">
+            <div class="aw-variant-group__label">
+              <span>{{ option.name }}</span>
+              <span class="aw-variant-group__selected" data-selected-label="{{ forloop.index0 }}">{{ option.selected_value }}</span>
+            </div>
+
+            {%- if is_color -%}
+              <!-- Color Swatches (Circles) -->
+              <div class="aw-color-options">
+                {%- for value in option.values -%}
+                  {%- assign color_hex = '#c8c0b4' -%}
+                  {%- assign value_lower = value | downcase -%}
+                  {%- if value_lower contains 'white' or value_lower contains '白' or value_lower contains 'cream' or value_lower contains '米色' or value_lower contains '自然' or value_lower contains 'natural' or value_lower contains 'oat' or value_lower contains 'ivory' -%}
+                    {%- assign color_hex = '#f5f0e8' -%}
+                  {%- elsif value_lower contains 'black' or value_lower contains '黑' or value_lower contains 'charcoal' or value_lower contains 'onyx' -%}
+                    {%- assign color_hex = '#2c2420' -%}
+                  {%- elsif value_lower contains 'grey' or value_lower contains 'gray' or value_lower contains '灰' or value_lower contains 'silver' or value_lower contains 'stone' -%}
+                    {%- assign color_hex = '#a0988c' -%}
+                  {%- elsif value_lower contains 'beige' or value_lower contains 'tan' or value_lower contains 'sand' or value_lower contains 'taupe' or value_lower contains '浅棕' -%}
+                    {%- assign color_hex = '#d4c4b0' -%}
+                  {%- elsif value_lower contains 'brown' or value_lower contains '棕' or value_lower contains 'chocolate' or value_lower contains 'walnut' or value_lower contains 'wood' or value_lower contains 'dark' -%}
+                    {%- assign color_hex = '#8b7355' -%}
+                  {%- elsif value_lower contains 'green' or value_lower contains '绿' or value_lower contains 'olive' or value_lower contains 'sage' or value_lower contains 'forest' or value_lower contains 'moss' -%}
+                    {%- assign color_hex = '#7a8b6f' -%}
+                  {%- elsif value_lower contains 'blue' or value_lower contains '蓝' or value_lower contains 'navy' or value_lower contains 'indigo' or value_lower contains 'denim' -%}
+                    {%- assign color_hex = '#6b7d8e' -%}
+                  {%- elsif value_lower contains 'terracotta' or value_lower contains 'rust' or value_lower contains 'clay' or value_lower contains '赤' -%}
+                    {%- assign color_hex = '#c17f59' -%}
+                  {%- elsif value_lower contains 'red' or value_lower contains '红' or value_lower contains 'burgundy' or value_lower contains 'wine' or value_lower contains 'maroon' -%}
+                    {%- assign color_hex = '#a04a3a' -%}
+                  {%- elsif value_lower contains 'pink' or value_lower contains '粉' or value_lower contains 'rose' or value_lower contains 'blush' -%}
+                    {%- assign color_hex = '#d4a0a0' -%}
+                  {%- elsif value_lower contains 'yellow' or value_lower contains '黄' or value_lower contains 'gold' or value_lower contains 'mustard' or value_lower contains 'amber' -%}
+                    {%- assign color_hex = '#c9a96e' -%}
+                  {%- elsif value_lower contains 'purple' or value_lower contains '紫' or value_lower contains 'lavender' or value_lower contains 'lilac' or value_lower contains 'mauve' -%}
+                    {%- assign color_hex = '#9b8aaa' -%}
+                  {%- elsif value_lower contains 'linen' or value_lower contains 'flax' -%}
+                    {%- assign color_hex = '#e8ddcc' -%}
+                  {%- elsif value_lower contains 'hemp' or value_lower contains 'jute' or value_lower contains 'sisal' -%}
+                    {%- assign color_hex = '#c4b49a' -%}
+                  {%- elsif value_lower contains 'multi' or value_lower contains 'mixed' or value_lower contains 'assorted' or value_lower contains '混' -%}
+                    {%- assign color_hex = 'conic-gradient(#f5f0e8,#d4c4b0,#c17f59,#7a8b6f,#6b7d8e)' -%}
+                  {%- endif -%}
+                  <button
+                    type="button"
+                    class="aw-color-btn{% if value == option.selected_value %} selected{% endif %}"
+                    data-option-index="{{ forloop.index0 }}"
+                    data-option-value="{{ value | escape }}"
+                    {% unless value == option.selected_value %}disabled{% endunless %}
+                  >
+                    <span class="aw-color-btn__swatch" style="background: {{ color_hex }};"></span>
+                    <span class="aw-color-btn__tooltip">{{ value }}</span>
+                  </button>
+                {%- endfor -%}
               </div>
 
-              {%- if is_color -%}
-                <div class="ad-color-options">
-                  {%- for value in option.values -%}
-                    {%- assign color_hex = '#e0dcd5' -%}
-                    {%- assign value_downcase = value | downcase -%}
-                    {%- if value_downcase contains 'white' or value_downcase contains '白' or value_downcase contains 'cream' or value_downcase contains '米色' -%}
-                      {%- assign color_hex = '#f5f0e8' -%}
-                    {%- elsif value_downcase contains 'black' or value_downcase contains '黑' or value_downcase contains 'charcoal' -%}
-                      {%- assign color_hex = '#2c2420' -%}
-                    {%- elsif value_downcase contains 'grey' or value_downcase contains 'gray' or value_downcase contains '灰' or value_downcase contains 'stone' -%}
-                      {%- assign color_hex = '#9c958d' -%}
-                    {%- elsif value_downcase contains 'beige' or value_downcase contains 'wheat' or value_downcase contains '自然' or value_downcase contains '浅咖' or value_downcase contains 'natural' -%}
-                      {%- assign color_hex = '#d4c5b2' -%}
-                    {%- elsif value_downcase contains 'brown' or value_downcase contains '棕' or value_downcase contains '深咖' or value_downcase contains 'coffee' or value_downcase contains 'walnut' -%}
-                      {%- assign color_hex = '#8b7355' -%}
-                    {%- elsif value_downcase contains 'green' or value_downcase contains '绿' or value_downcase contains 'olive' or value_downcase contains 'sage' -%}
-                      {%- assign color_hex = '#7d8c6e' -%}
-                    {%- elsif value_downcase contains 'blue' or value_downcase contains '蓝' or value_downcase contains 'navy' -%}
-                      {%- assign color_hex = '#5b6e8a' -%}
-                    {%- elsif value_downcase contains 'terracotta' or value_downcase contains 'rust' or value_downcase contains '土' or value_downcase contains 'clay' -%}
-                      {%- assign color_hex = '#c17f59' -%}
-                    {%- elsif value_downcase contains 'red' or value_downcase contains '红' or value_downcase contains 'wine' -%}
-                      {%- assign color_hex = '#8b3a3a' -%}
-                    {%- elsif value_downcase contains 'pink' or value_downcase contains '粉' or value_downcase contains 'rose' -%}
-                      {%- assign color_hex = '#d4a0a0' -%}
-                    {%- elsif value_downcase contains '黄色' or value_downcase contains 'yellow' or value_downcase contains 'gold' -%}
-                      {%- assign color_hex = '#c4a35a' -%}
-                    {%- elsif value_downcase contains 'purple' or value_downcase contains '紫' or value_downcase contains 'lavender' -%}
-                      {%- assign color_hex = '#8b7daa' -%}
-                    {%- elsif value_downcase contains 'orange' or value_downcase contains '桔' or value_downcase contains 'amber' -%}
-                      {%- assign color_hex = '#c4946a' -%}
-                    {%- endif -%}
+            {%- else -%}
+              <!-- Size / Other Pills -->
+              <div class="aw-size-options">
+                {%- for value in option.values -%}
+                  {%- assign dim_text = '' -%}
+                  {%- assign value_lower2 = value | downcase -%}
+                  {%- if value_lower2 contains 's' and value_lower2 contains 'cm' -%}
+                    {%- assign dim_text = value | split: ' ' | last -%}
+                  {%- endif -%}
+                  <button
+                    type="button"
+                    class="aw-size-btn{% if value == option.selected_value %} selected{% endif %}"
+                    data-option-index="{{ forloop.index0 }}"
+                    data-option-value="{{ value | escape }}"
+                    {% unless value == option.selected_value %}disabled{% endunless %}
+                  >
+                    {{ value }}
+                    {%- if dim_text != blank -%}<span class="aw-size-btn__dim">{{ dim_text }}</span>{%- endif -%}
+                  </button>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
 
-                    <button
-                      type="button"
-                      class="ad-color-btn{% if option.selected_value == value %} ad-color-btn--selected{% endif %}"
-                      data-option-index="{{ forloop.index0 }}"
-                      data-option-value="{{ value | escape }}"
-                      title="{{ value }}"
-                    >
-                      <span class="ad-color-btn__swatch" style="background: {{ color_hex }}; border: 1px solid rgba(0,0,0,0.08)"></span>
-                      <span class="ad-color-btn__tooltip">{{ value }}</span>
-                    </button>
-                  {%- endfor -%}
-                </div>
-              {%- else -%}
-                <div class="ad-size-options">
-                  {%- for value in option.values -%}
-                    <button
-                      type="button"
-                      class="ad-size-btn{% if option.selected_value == value %} ad-size-btn--selected{% endif %}"
-                      data-option-index="{{ forloop.index0 }}"
-                      data-option-value="{{ value | escape }}"
-                    >
-                      {{ value }}
-                    </button>
-                  {%- endfor -%}
-                </div>
-              {%- endif -%}
-            </div>
-          {%- endfor -%}
-        {%- endunless -%}
+        <!-- Quantity + ATC -->
+        <div class="aw-pdp__actions">
+          <div class="aw-qty">
+            <button type="button" class="aw-qty__btn" data-qty-minus aria-label="Decrease quantity">−</button>
+            <input type="number" name="quantity" class="aw-qty__input" value="1" min="1" data-qty-input>
+            <button type="button" class="aw-qty__btn" data-qty-plus aria-label="Increase quantity">+</button>
+          </div>
 
-        {% comment %}=== QUANTITY + ATC ==={% endcomment %}
-        <div class="ad-qty">
-          <button type="button" class="ad-qty__btn" data-qty-minus aria-label="Decrease quantity">&minus;</button>
-          <input
-            type="number"
-            name="quantity"
-            value="1"
-            min="1"
-            class="ad-qty__input"
-            data-qty-input
-            aria-label="Quantity"
-          >
-          <button type="button" class="ad-qty__btn" data-qty-plus aria-label="Increase quantity">+</button>
-        </div>
-
-        <div class="ad-product__actions">
           <button
             type="submit"
             name="add"
-            class="ad-atc-btn"
-            data-add-to-cart
+            class="aw-btn--atc{% unless current_variant.available %} aw-btn--atc--waitlist{% endunless %}"
+            data-atc-btn
             {% unless current_variant.available %}disabled{% endunless %}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-            <span data-add-to-cart-text>
-              {%- if current_variant.available -%}
-                {{ 'product.add_to_cart' | t }}
-              {%- else -%}
-                {{ 'product.sold_out' | t }}
-              {%- endif -%}
-            </span>
+            {%- if current_variant.available -%}
+              {{ 'product.add_to_cart' | t }}
+            {%- else -%}
+              Join Waitlist
+            {%- endif -%}
           </button>
-
-          {%- if section.settings.show_buy_now -%}
-            {{ form | payment_button }}
-          {%- endif -%}
-        </div>
-      {%- endform -%}
-
-      {% comment %}=== PRODUCT DETAIL TABS ==={% endcomment %}
-      <div class="ad-product-tabs" data-product-tabs>
-        <div class="ad-product-tabs__nav">
-          {%- if section.settings.show_description and product.description != blank -%}
-            <button class="ad-product-tabs__tab ad-product-tabs__tab--active" data-tab="description">Description</button>
-          {%- endif -%}
-          {%- if section.settings.show_materials -%}
-            <button class="ad-product-tabs__tab{% unless section.settings.show_description and product.description != blank %} ad-product-tabs__tab--active{% endunless %}" data-tab="materials">Materials</button>
-          {%- endif -%}
-          {%- if section.settings.show_specs -%}
-            <button class="ad-product-tabs__tab" data-tab="specs">Specifications</button>
-          {%- endif -%}
-          {%- if section.settings.show_care -%}
-            <button class="ad-product-tabs__tab" data-tab="care">Care</button>
-          {%- endif -%}
         </div>
 
-        {%- if section.settings.show_description and product.description != blank -%}
-          <div class="ad-product-tabs__panel ad-product-tabs__panel--active" data-tab-panel="description">
-            {{ product.description }}
-          </div>
+        {%- if current_variant.available -%}
+          {{ form | payment_button }}
         {%- endif -%}
+      {% endform %}
 
-        {%- if section.settings.show_materials -%}
-          <div class="ad-product-tabs__panel{% unless section.settings.show_description and product.description != blank %} ad-product-tabs__panel--active{% endunless %}" data-tab-panel="materials">
-            {{ section.settings.materials_text }}
-          </div>
-        {%- endif -%}
+      <div class="aw-pdp__divider"></div>
 
-        {%- if section.settings.show_specs -%}
-          <div class="ad-product-tabs__panel" data-tab-panel="specs">
-            {%- if section.settings.specs_intro != blank -%}
-              <p>{{ section.settings.specs_intro }}</p>
-            {%- endif -%}
-            {%- if section.blocks.size > 0 -%}
-              <table class="ad-specs-table">
-                <tbody>
-                  {%- for block in section.blocks -%}
-                    {%- if block.type == 'spec' -%}
-                      <tr>
-                        <td>{{ block.settings.label }}</td>
-                        <td>{{ block.settings.value }}</td>
-                      </tr>
-                    {%- endif -%}
-                  {%- endfor -%}
-                </tbody>
-              </table>
+      <!-- ══════ INLINE PRODUCT SECTIONS (Citizenry-style) ══════ -->
+
+      <!-- Artisan Block -->
+      {%- if section.settings.artisan_name != blank -%}
+      <div class="aw-pdp__artisan">
+        <div class="aw-pdp__artisan-icon">
+          {%- if section.settings.artisan_icon != blank -%}
+            {{ section.settings.artisan_icon }}
+          {%- else -%}
+            <span style="font-size:2rem;">🧶</span>
+          {%- endif -%}
+        </div>
+        <div class="aw-pdp__artisan-content">
+          <div class="aw-pdp__artisan-name">{{ section.settings.artisan_name }}</div>
+          <div class="aw-pdp__artisan-meta">
+            <span>{{ section.settings.artisan_location | default: 'Handcrafted with care' }}</span>
+            {%- if section.settings.artisan_technique != blank -%}
+              <span class="aw-pdp__artisan-badge">✦ {{ section.settings.artisan_technique }}</span>
             {%- endif -%}
           </div>
-        {%- endif -%}
+        </div>
+      </div>
+      {%- endif -%}
 
-        {%- if section.settings.show_care -%}
-          <div class="ad-product-tabs__panel" data-tab-panel="care">
-            {{ section.settings.care_text }}
+      <!-- Details Grid -->
+      {%- if section.settings.material_detail != blank or section.settings.dimensions != blank or section.settings.weight != blank or section.settings.color_detail != blank -%}
+      <div class="aw-pdp__section">
+        <h3 class="aw-pdp__section-title">{{ section.settings.details_heading | default: 'Details &amp; Dimensions' }}</h3>
+        <div class="aw-pdp__details-grid">
+          {%- if section.settings.material_detail != blank -%}
+          <div class="aw-pdp__detail-card">
+            <div class="aw-pdp__detail-icon">🌿</div>
+            <div class="aw-pdp__detail-label">Material</div>
+            <div class="aw-pdp__detail-value">{{ section.settings.material_detail }}</div>
           </div>
-        {%- endif -%}
+          {%- endif -%}
+          {%- if section.settings.dimensions != blank -%}
+          <div class="aw-pdp__detail-card">
+            <div class="aw-pdp__detail-icon">📐</div>
+            <div class="aw-pdp__detail-label">Dimensions</div>
+            <div class="aw-pdp__detail-value">{{ section.settings.dimensions }}</div>
+          </div>
+          {%- endif -%}
+          {%- if section.settings.weight != blank -%}
+          <div class="aw-pdp__detail-card">
+            <div class="aw-pdp__detail-icon">⚖️</div>
+            <div class="aw-pdp__detail-label">Weight</div>
+            <div class="aw-pdp__detail-value">{{ section.settings.weight }}</div>
+          </div>
+          {%- endif -%}
+          {%- if section.settings.color_detail != blank -%}
+          <div class="aw-pdp__detail-card">
+            <div class="aw-pdp__detail-icon">🎨</div>
+            <div class="aw-pdp__detail-label">Color</div>
+            <div class="aw-pdp__detail-value">{{ section.settings.color_detail }}</div>
+          </div>
+          {%- endif -%}
+          {%- if section.settings.craft_detail != blank -%}
+          <div class="aw-pdp__detail-card">
+            <div class="aw-pdp__detail-icon">✋</div>
+            <div class="aw-pdp__detail-label">Technique</div>
+            <div class="aw-pdp__detail-value">{{ section.settings.craft_detail }}</div>
+          </div>
+          {%- endif -%}
+        </div>
+      </div>
+      {%- endif -%}
+
+      <!-- Care Instructions -->
+      {%- if section.settings.care_text != blank -%}
+      <div class="aw-pdp__section">
+        <h3 class="aw-pdp__section-title">{{ section.settings.care_heading | default: 'Care Instructions' }}</h3>
+        <div class="aw-pdp__care">
+          <span class="aw-pdp__care-icon">💧</span>
+          <span>{{ section.settings.care_text }}</span>
+        </div>
+      </div>
+      {%- endif -%}
+
+      <!-- Shipping & Returns -->
+      <div class="aw-pdp__section">
+        <h3 class="aw-pdp__section-title">{{ section.settings.shipping_heading | default: 'Shipping &amp; Returns' }}</h3>
+        <div class="aw-pdp__care">
+          <span class="aw-pdp__care-icon">📦</span>
+          <span>
+            {{ section.settings.shipping_text | default: 'Free standard shipping on orders over €49. Orders ship within 1–3 business days from our studio. Delivery: 5–10 business days within Europe.' }}
+          </span>
+        </div>
+        <div class="aw-pdp__care" style="margin-top:12px;">
+          <span class="aw-pdp__care-icon">🔄</span>
+          <span>
+            {{ section.settings.returns_text | default: '30-day hassle-free returns. If you are not completely satisfied with your purchase, we will make it right.' }}
+          </span>
+        </div>
       </div>
 
+      <!-- Trust Strip -->
+      <div class="aw-pdp__trust">
+        <div class="aw-pdp__trust-item">
+          <span class="aw-pdp__trust-icon">🌍</span>
+          <span>Free Shipping EU over €49</span>
+        </div>
+        <div class="aw-pdp__trust-item">
+          <span class="aw-pdp__trust-icon">🛡️</span>
+          <span>30-Day Returns</span>
+        </div>
+        <div class="aw-pdp__trust-item">
+          <span class="aw-pdp__trust-icon">🤝</span>
+          <span>Fair Trade</span>
+        </div>
+        <div class="aw-pdp__trust-item">
+          <span class="aw-pdp__trust-icon">🌱</span>
+          <span>Sustainable Materials</span>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- ══════ STICKY ATC BAR ══════ -->
+  <div class="aw-sticky-atc" data-sticky-atc>
+    <div class="aw-sticky-atc__img">
+      {%- if featured_img -%}
+        {{ featured_img | image_url: width: 120 | image_tag:
+          loading:'lazy',
+          alt: product.title | escape,
+          style:'width:100%;height:100%;object-fit:cover;display:block'
+        }}
+      {%- endif -%}
+    </div>
+    <div class="aw-sticky-atc__info">
+      <div class="aw-sticky-atc__title">{{ product.title }}</div>
+      <div class="aw-sticky-atc__variant" data-sticky-variant-label>{{ current_variant.title | default: 'Standard' }}</div>
+    </div>
+    <button type="button" class="aw-btn--atc" data-sticky-atc-btn>
+      {{ current_variant.price | money }} — {{ 'product.add_to_cart' | t }}
+    </button>
   </div>
 </section>
 
+<!-- Toast Notification -->
+<div class="aw-pdp__toast" data-toast></div>
+
+<!-- ══════ PRODUCT DATA (JSON) ══════ -->
+<script type="application/json" data-product-data>
+  {{ product | json }}
+</script>
+
 <script>
-  (function() {
-    var section = document.querySelector('[data-section-type="ad-product"]');
-    if (!section) return;
+(function() {
+  var section = document.querySelector('[data-section="{{ section.id }}"]');
+  if (!section) return;
 
-    var productData = {{ product | json }};
-    var form = section.querySelector('[data-variant-id]').closest('form');
-    var variantInput = section.querySelector('[data-variant-id]');
-    var priceEl = section.querySelector('[data-product-price]');
-    var compareEl = section.querySelector('[data-compare-price]');
-    var atcBtn = section.querySelector('[data-add-to-cart]');
-    var atcText = section.querySelector('[data-add-to-cart-text]');
-    var qtyInput = section.querySelector('[data-qty-input]');
-    var featuredImg = document.getElementById('ad-product-featured');
-    var moneyFormat = '{{ shop.money_format | default: "€{{amount}}" | escape }}';
+  var productData = JSON.parse(section.querySelector('[data-product-data]').textContent);
+  var form = section.querySelector('[data-product-form]');
+  var variantInput = section.querySelector('[data-variant-id-input]');
+  var atcBtn = section.querySelector('[data-atc-btn]');
+  var priceEl = section.querySelector('[data-current-price]');
+  var compareEl = section.querySelector('[data-compare-price]');
+  var saveEl = section.querySelector('.aw-pdp__save');
+  var stockRow = section.querySelector('[data-stock-status]');
+  var mainImg = section.querySelector('#pdp-main-img');
+  var toast = section.querySelector('[data-toast]');
 
-    function formatMoney(cents, format) {
-      if (typeof Shopify !== 'undefined' && Shopify.formatMoney) {
-        return Shopify.formatMoney(cents, format);
+  var stickyAtc = document.querySelector('[data-sticky-atc]');
+  var stickyBtn = stickyAtc ? stickyAtc.querySelector('[data-sticky-atc-btn]') : null;
+  var stickyVariant = stickyAtc ? stickyAtc.querySelector('[data-sticky-variant-label]') : null;
+
+  // ── Get selected options ──
+  function getSelectedOptions() {
+    var groups = section.querySelectorAll('[data-option-index]');
+    var opts = [];
+    groups.forEach(function(g) {
+      var idx = parseInt(g.getAttribute('data-option-index'));
+      var sel = g.querySelector('.selected, [selected]');
+      opts[idx] = sel ? sel.getAttribute('data-option-value') : null;
+    });
+    return opts;
+  }
+
+  // ── Find variant by options ──
+  function findVariant(options) {
+    return productData.variants.find(function(v) {
+      for (var i = 0; i < options.length; i++) {
+        if (options[i] && v['option' + (i + 1)] !== options[i]) return false;
       }
-      var value = (cents / 100).toFixed(2);
-      return format.replace('{{amount}}', value);
-    }
+      return true;
+    });
+  }
 
-    function findVariant(options) {
-      return productData.variants.find(function(v) {
-        for (var i = 0; i < options.length; i++) {
-          if (options[i] && v['option' + (i + 1)] !== options[i]) return false;
-        }
-        return true;
-      });
-    }
+  // ── Update availability ──
+  function updateAvailability() {
+    var currentSel = getSelectedOptions();
+    var groups = section.querySelectorAll('.aw-variant-group');
 
-    function getSelectedOptions() {
-      var groups = section.querySelectorAll('[data-option-index]');
-      var selected = [];
-      groups.forEach(function(btn) {
-        var idx = parseInt(btn.getAttribute('data-option-index'));
-        if (btn.classList.contains('ad-size-btn--selected') || btn.classList.contains('ad-color-btn--selected')) {
-          selected[idx] = btn.getAttribute('data-option-value');
-        }
-      });
-      return selected;
-    }
+    groups.forEach(function(group) {
+      var optIdx = parseInt(group.getAttribute('data-option-index'));
+      var btns = group.querySelectorAll('[data-option-value]');
 
-    function updatePriceAndATC(variant) {
-      if (!variant) return;
-      variantInput.value = variant.id;
-      if (priceEl) {
-        priceEl.textContent = formatMoney(variant.price, moneyFormat);
-      }
-      if (compareEl) {
-        if (variant.compare_at_price && variant.compare_at_price > variant.price) {
-          compareEl.textContent = formatMoney(variant.compare_at_price, moneyFormat);
-          compareEl.style.display = 'inline';
+      btns.forEach(function(btn) {
+        var testOpts = currentSel.slice();
+        testOpts[optIdx] = btn.getAttribute('data-option-value');
+        var v = findVariant(testOpts);
+        if (v && v.available) {
+          btn.disabled = false;
+          btn.classList.remove('unavailable');
         } else {
-          compareEl.style.display = 'none';
+          btn.disabled = true;
+          btn.classList.add('unavailable');
         }
+      });
+    });
+  }
+
+  // ── Update price and stock ──
+  function updatePriceStock(variant) {
+    if (!variant) return;
+
+    variantInput.value = variant.id;
+
+    if (priceEl) {
+      priceEl.textContent = Shopify.formatMoney(variant.price, '{{ shop.money_format | escape }}');
+    }
+    if (compareEl && variant.compare_at_price) {
+      compareEl.textContent = Shopify.formatMoney(variant.compare_at_price, '{{ shop.money_format | escape }}');
+      compareEl.style.display = '';
+      if (saveEl) {
+        saveEl.textContent = 'Save ' + Shopify.formatMoney(variant.compare_at_price - variant.price, '{{ shop.money_format | escape }}');
+        saveEl.style.display = '';
       }
+    } else {
+      if (compareEl) compareEl.style.display = 'none';
+      if (saveEl) saveEl.style.display = 'none';
+    }
+
+    if (variant.available) {
+      atcBtn.disabled = false;
+      atcBtn.classList.remove('aw-btn--atc--waitlist');
+      atcBtn.textContent = '{{ "product.add_to_cart" | t }}';
+    } else {
+      atcBtn.disabled = true;
+      atcBtn.classList.add('aw-btn--atc--waitlist');
+      atcBtn.textContent = 'Join Waitlist';
+    }
+
+    // Stock row
+    if (stockRow) {
       if (variant.available) {
-        atcBtn.disabled = false;
-        atcText.textContent = '{{ "products.product.add_to_cart" | t }}';
-      } else {
-        atcBtn.disabled = true;
-        atcText.textContent = '{{ "products.product.sold_out" | t }}';
-      }
-      if (variant.featured_image && featuredImg) {
-        featuredImg.src = variant.featured_image.src;
-        featuredImg.alt = variant.featured_image.alt || '';
-      }
-    }
-
-    function updateAvailability() {
-      var allGroups = section.querySelectorAll('.ad-variant-group');
-      var currentSelected = getSelectedOptions();
-
-      allGroups.forEach(function(group) {
-        var optionIndex = parseInt(group.getAttribute('data-option-index'));
-        var buttons = group.querySelectorAll('[data-option-value]');
-
-        buttons.forEach(function(btn) {
-          var testOptions = currentSelected.slice();
-          testOptions[optionIndex] = btn.getAttribute('data-option-value');
-          var variant = findVariant(testOptions);
-
-          if (variant && variant.available) {
-            btn.disabled = false;
-            btn.classList.remove('ad-color-btn--disabled', 'ad-size-btn--disabled');
-          } else {
-            btn.disabled = true;
-          }
-        });
-      });
-    }
-
-    function updateSelectedLabels() {
-      var groups = section.querySelectorAll('.ad-variant-group');
-      groups.forEach(function(group) {
-        var label = group.querySelector('[data-selected-option]');
-        if (!label) return;
-        var selectedBtn = group.querySelector('.ad-color-btn--selected, .ad-size-btn--selected');
-        if (selectedBtn) {
-          label.textContent = ': ' + selectedBtn.getAttribute('data-option-value');
+        if (variant.inventory_quantity && variant.inventory_quantity <= 5) {
+          stockRow.innerHTML = '<span class="aw-pdp__stock-dot aw-pdp__stock-dot--low"></span><span>Low stock — only ' + variant.inventory_quantity + ' remaining</span>';
         } else {
-          label.textContent = '';
+          stockRow.innerHTML = '<span class="aw-pdp__stock-dot aw-pdp__stock-dot--in"></span><span>In stock — ready to ship</span>';
+        }
+      } else {
+        stockRow.innerHTML = '<span class="aw-pdp__stock-dot aw-pdp__stock-dot--out"></span><span>Currently sold out</span>';
+      }
+    }
+  }
+
+  // ── Update main image ──
+  function updateImage(variant) {
+    if (!variant) return;
+    if (variant.featured_image && mainImg) {
+      var newSrc = variant.featured_image.src.replace(/\.(jpg|png|webp)/, '_1000x.$1');
+      mainImg.src = newSrc;
+    }
+  }
+
+  // ── Update selected labels ──
+  function updateLabels() {
+    var groups = section.querySelectorAll('.aw-variant-group');
+    groups.forEach(function(group) {
+      var idx = group.getAttribute('data-option-index');
+      var selBtn = group.querySelector('.selected');
+      var label = group.querySelector('[data-selected-label="' + idx + '"]');
+      if (label && selBtn) {
+        label.textContent = selBtn.getAttribute('data-option-value');
+      }
+    });
+  }
+
+  // ── Update sticky ATC ──
+  function updateStickyAtc(variant) {
+    if (!stickyBtn || !variant) return;
+    var price = Shopify.formatMoney(variant.price, '{{ shop.money_format | escape }}');
+    stickyBtn.textContent = price + ' — ' + (variant.available ? '{{ "product.add_to_cart" | t }}' : 'Sold Out');
+    if (stickyVariant) {
+      stickyVariant.textContent = variant.title || 'Standard';
+    }
+  }
+
+  // ── Full variant update ──
+  function onVariantChange(variant) {
+    updatePriceStock(variant);
+    updateImage(variant);
+    updateStickyAtc(variant);
+    updateLabels();
+    updateAvailability();
+  }
+
+  // ── Event: option click ──
+  section.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-option-value]');
+    if (!btn || btn.disabled) return;
+
+    var groupEl = btn.closest('.aw-variant-group');
+    var groupIdx = groupEl.getAttribute('data-option-index');
+
+    // Toggle selection
+    groupEl.querySelectorAll('[data-option-value]').forEach(function(b) {
+      b.classList.remove('selected');
+      b.setAttribute('aria-selected', 'false');
+    });
+
+    btn.classList.add('selected');
+    btn.setAttribute('aria-selected', 'true');
+
+    var opts = getSelectedOptions();
+    var variant = findVariant(opts);
+
+    if (variant) {
+      onVariantChange(variant);
+    }
+  });
+
+  // ── Quantity controls ──
+  var qtyInput = section.querySelector('[data-qty-input]');
+  var qtyMinus = section.querySelector('[data-qty-minus]');
+  var qtyPlus = section.querySelector('[data-qty-plus]');
+
+  if (qtyMinus && qtyInput) {
+    qtyMinus.addEventListener('click', function() {
+      var v = parseInt(qtyInput.value) || 1;
+      if (v > 1) qtyInput.value = v - 1;
+    });
+  }
+  if (qtyPlus && qtyInput) {
+    qtyPlus.addEventListener('click', function() {
+      var v = parseInt(qtyInput.value) || 0;
+      qtyInput.value = v + 1;
+    });
+  }
+
+  // ── Gallery thumbnails ──
+  var thumbs = section.querySelectorAll('.aw-pdp__thumb');
+  thumbs.forEach(function(thumb) {
+    thumb.addEventListener('click', function() {
+      if (!mainImg) return;
+      mainImg.src = thumb.getAttribute('data-image-url');
+      thumbs.forEach(function(t) { t.classList.remove('active'); });
+      thumb.classList.add('active');
+    });
+  });
+
+  // ── Gallery arrows (mobile) ──
+  var galleryImages = [];
+  thumbs.forEach(function(t) { galleryImages.push(t.getAttribute('data-image-url')); });
+  var currentGalleryIdx = 0;
+  var prevArrow = section.querySelector('[data-gallery-prev]');
+  var nextArrow = section.querySelector('[data-gallery-next]');
+
+  if (prevArrow && nextArrow && galleryImages.length > 0) {
+    prevArrow.addEventListener('click', function() {
+      currentGalleryIdx = (currentGalleryIdx - 1 + galleryImages.length) % galleryImages.length;
+      mainImg.src = galleryImages[currentGalleryIdx];
+    });
+    nextArrow.addEventListener('click', function() {
+      currentGalleryIdx = (currentGalleryIdx + 1) % galleryImages.length;
+      mainImg.src = galleryImages[currentGalleryIdx];
+    });
+  }
+
+  // ── Sticky ATC visibility ──
+  if (stickyAtc) {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          stickyAtc.classList.remove('visible');
+        } else {
+          stickyAtc.classList.add('visible');
         }
       });
-    }
+    }, { threshold: 0 });
 
-    // Click handler for all variant buttons
-    section.addEventListener('click', function(e) {
-      var btn = e.target.closest('.ad-size-btn, .ad-color-btn');
-      if (!btn || btn.disabled) return;
+    var atcActions = section.querySelector('.aw-pdp__actions');
+    if (atcActions) observer.observe(atcActions);
+  }
 
-      var optionIndex = parseInt(btn.getAttribute('data-option-index'));
-      var group = section.querySelector('.ad-variant-group[data-option-index="' + optionIndex + '"]');
+  // ── Sticky ATC button click ──
+  if (stickyBtn && atcBtn) {
+    stickyBtn.addEventListener('click', function() {
+      atcBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(function() {
+        atcBtn.click();
+      }, 600);
+    });
+  }
 
-      // Deselect all in group
-      group.querySelectorAll('.ad-size-btn--selected, .ad-color-btn--selected').forEach(function(b) {
-        b.classList.remove('ad-size-btn--selected', 'ad-color-btn--selected');
-      });
-
-      // Select clicked
-      btn.classList.add(btn.classList.contains('ad-size-btn') ? 'ad-size-btn--selected' : 'ad-color-btn--selected');
-
-      updateAvailability();
-      updateSelectedLabels();
-
-      // Try to find matching variant
-      var selected = getSelectedOptions();
-      var allSelected = selected.every(function(s, i) {
-        return productData.options.length === i || s;
-      });
-
-      if (allSelected) {
-        var variant = findVariant(selected);
-        if (variant) updatePriceAndATC(variant);
+  // ── Form submission (ATC notification) ──
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      // Shopify handles adding to cart natively via AJAX
+      if (toast && atcBtn && !atcBtn.disabled) {
+        setTimeout(function() {
+          toast.textContent = '✦ Added to cart — ' + (qtyInput ? qtyInput.value : '1') + ' item(s)';
+          toast.classList.add('show');
+          setTimeout(function() { toast.classList.remove('show'); }, 3000);
+        }, 800);
       }
     });
+  }
 
-    // Quantity buttons
-    section.addEventListener('click', function(e) {
-      var minusBtn = e.target.closest('[data-qty-minus]');
-      var plusBtn = e.target.closest('[data-qty-plus]');
-      if (minusBtn) {
-        var val = parseInt(qtyInput.value) || 1;
-        if (val > 1) qtyInput.value = val - 1;
-      }
-      if (plusBtn) {
-        var val = parseInt(qtyInput.value) || 0;
-        qtyInput.value = val + 1;
-      }
-    });
+  // ── Initialize ──
+  var initialVariant = productData.variants.find(function(v) { return v.id === parseInt(variantInput.value); });
+  if (initialVariant) {
+    onVariantChange(initialVariant);
+  }
+  updateAvailability();
 
-    // Tab switching
-    var tabContainer = section.querySelector('[data-product-tabs]');
-    if (tabContainer) {
-      tabContainer.addEventListener('click', function(e) {
-        var tab = e.target.closest('.ad-product-tabs__tab');
-        if (!tab) return;
-
-        var tabName = tab.getAttribute('data-tab');
-        tabContainer.querySelectorAll('.ad-product-tabs__tab--active').forEach(function(t) {
-          t.classList.remove('ad-product-tabs__tab--active');
-        });
-        tabContainer.querySelectorAll('.ad-product-tabs__panel--active').forEach(function(p) {
-          p.classList.remove('ad-product-tabs__panel--active');
-        });
-
-        tab.classList.add('ad-product-tabs__tab--active');
-        var panel = tabContainer.querySelector('[data-tab-panel="' + tabName + '"]');
-        if (panel) panel.classList.add('ad-product-tabs__panel--active');
-      });
-    }
-
-    // Initial state
-    updateAvailability();
-    updateSelectedLabels();
-  })();
+})();
 </script>
 
 {% schema %}
 {
-  "name": "Product Page",
-  "tag": "section",
+  "name": "Product page",
   "settings": [
     {
-      "type": "checkbox",
-      "id": "show_buy_now",
-      "label": "Show Buy It Now button",
-      "default": true
-    },
-    {
       "type": "header",
-      "content": "Product Detail Tabs"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_description",
-      "label": "Show Description tab",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_materials",
-      "label": "Show Materials tab",
-      "default": true
-    },
-    {
-      "type": "richtext",
-      "id": "materials_text",
-      "label": "Materials content",
-      "default": "<p>Each Aela Daily piece is crafted from carefully selected natural materials that honor the Japanese philosophy of <em>wabi-sabi</em> — finding beauty in imperfection and impermanence.</p><ul><li><strong>Natural cotton rope</strong> — hand-woven, unbleached, with subtle tonal variations</li><li><strong>Rattan &amp; wicker</strong> — sustainably harvested, hand-shaped by artisans</li><li><strong>Linen-cotton blend</strong> — pre-washed for softness, OEKO-TEX certified</li><li><strong>Natural soy wax</strong> — clean-burning, eco-friendly, vegan</li><li><strong>Unglazed ceramic</strong> — matte finish, hand-thrown, food-safe</li></ul>"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_specs",
-      "label": "Show Specifications tab",
-      "default": true
+      "content": "Craft Details"
     },
     {
       "type": "text",
-      "id": "specs_intro",
-      "label": "Specifications intro text",
-      "default": "All measurements are approximate. Handmade items may vary slightly in size and finish."
+      "id": "origin",
+      "label": "Origin",
+      "default": "Handcrafted"
     },
     {
-      "type": "checkbox",
-      "id": "show_care",
-      "label": "Show Care tab",
-      "default": true
+      "type": "text",
+      "id": "material_summary",
+      "label": "Material summary",
+      "default": "Natural fibers"
     },
     {
-      "type": "richtext",
+      "type": "text",
+      "id": "craft_time",
+      "label": "Craft time",
+      "default": "2–4 days"
+    },
+    {
+      "type": "header",
+      "content": "Artisan Story"
+    },
+    {
+      "type": "text",
+      "id": "artisan_name",
+      "label": "Artisan name / studio",
+      "default": "Zhejiang Yi Fang Yuan Crafts Studio"
+    },
+    {
+      "type": "text",
+      "id": "artisan_icon",
+      "label": "Artisan icon (emoji)"
+    },
+    {
+      "type": "text",
+      "id": "artisan_location",
+      "label": "Artisan location",
+      "default": "Zhejiang, China — Handcrafted with generations of weaving tradition"
+    },
+    {
+      "type": "text",
+      "id": "artisan_technique",
+      "label": "Technique badge",
+      "default": "Handwoven"
+    },
+    {
+      "type": "header",
+      "content": "Product Details"
+    },
+    {
+      "type": "text",
+      "id": "details_heading",
+      "label": "Details heading",
+      "default": "Details & Dimensions"
+    },
+    {
+      "type": "textarea",
+      "id": "material_detail",
+      "label": "Material detail",
+      "default": "100% natural rattan, hand-harvested and sun-dried"
+    },
+    {
+      "type": "text",
+      "id": "dimensions",
+      "label": "Dimensions",
+      "default": "Available in S (20cm), M (25cm), L (30cm), XL (35cm)"
+    },
+    {
+      "type": "text",
+      "id": "weight",
+      "label": "Weight",
+      "default": "0.8–1.5 kg depending on size"
+    },
+    {
+      "type": "text",
+      "id": "color_detail",
+      "label": "Color detail"
+    },
+    {
+      "type": "text",
+      "id": "craft_detail",
+      "label": "Craft technique detail"
+    },
+    {
+      "type": "header",
+      "content": "Care"
+    },
+    {
+      "type": "text",
+      "id": "care_heading",
+      "label": "Care heading",
+      "default": "Care Instructions"
+    },
+    {
+      "type": "textarea",
       "id": "care_text",
-      "label": "Care instructions",
-      "default": "<p>To preserve the natural beauty of your Aela Daily pieces:</p><ul><li>Spot clean with a damp cloth for most items</li><li>Avoid prolonged direct sunlight to maintain natural tones</li><li>Cotton rope and linen items: hand wash in cold water, reshape and air dry flat</li><li>Rattan and wicker: dust regularly with a soft brush, occasional wipe with damp cloth</li><li>Soy wax candles: trim wick to 5mm before each use, never leave burning unattended</li><li>Ceramic pieces: dishwasher safe on gentle cycle, hand wash recommended for longevity</li></ul>"
-    }
-  ],
-  "blocks": [
+      "label": "Care text",
+      "default": "Wipe clean with a soft, dry cloth. Avoid prolonged exposure to direct sunlight and moisture. For deep cleaning, use a slightly damp cloth and air dry completely. Natural rattan may develop a beautiful patina over time."
+    },
     {
-      "type": "spec",
-      "name": "Product Specification",
-      "settings": [
-        {
-          "type": "text",
-          "id": "label",
-          "label": "Label",
-          "default": "Material"
-        },
-        {
-          "type": "text",
-          "id": "value",
-          "label": "Value",
-          "default": "Natural cotton"
-        }
-      ]
+      "type": "header",
+      "content": "Shipping & Returns"
+    },
+    {
+      "type": "text",
+      "id": "shipping_heading",
+      "label": "Shipping heading",
+      "default": "Shipping & Returns"
+    },
+    {
+      "type": "textarea",
+      "id": "shipping_text",
+      "label": "Shipping text",
+      "default": "Free standard shipping on orders over €49. Orders ship within 1–3 business days from our studio. Delivery: 5–10 business days within Europe."
+    },
+    {
+      "type": "textarea",
+      "id": "returns_text",
+      "label": "Returns text",
+      "default": "30-day hassle-free returns. If you are not completely satisfied with your purchase, we will make it right."
     }
   ]
 }
